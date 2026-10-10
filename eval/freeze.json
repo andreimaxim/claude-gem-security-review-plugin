@@ -3,7 +3,7 @@
   "eval/answer_key.rb": "03db28c320e0b84c37ef95aa6614bf2cb516a4fbe23ec8a5417a744534ad3848",
   "eval/capture_sources.rb": "580bede3ffaab523e34aaca70fcfca77932f59afec85d4dc265f7119c9c50acc",
   "eval/check.rb": "d1eee018ed4ac6f39fdc85faca83d07d9d83db2dd6efefba11da3efad980c383",
-  "eval/fixture_source.json": "9fe5709a9c57ac0c59275e3bb1bf7f311fcf4896710ddd2e40ae61c5dc3f4aa4",
+  "eval/fixture_source.json": "f9af9bacc45bebc9d869e7c0ceba202e79607949b6a1668879fe7d88e0382794",
   "eval/freeze.rb": "28d1f665e12934396741adce7d91015775e3d8638f2a316baecbec03ef28850d",
   "eval/grade.rb": "ca30dce0652983ad7c2dedd520fe20a2bbdd0f33d45c5f46e5f69bb8d0e61852",
   "eval/observe.ts": "54aaa58e4944c608c8e0105a3ee5847278ae893843900c14306c2e89728a8d7a",

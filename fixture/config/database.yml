@@ -1,0 +1,14 @@
+default: &default
+  adapter: sqlite3
+  pool: 5
+  timeout: 100
+  # READWRITE | CREATE | SHAREDCACHE permits read_uncommitted export transactions.
+  flags: 131078
+
+development:
+  <<: *default
+  database: <%= ENV.fetch("NOTEBOOK_DB", Rails.root.join("db/development.sqlite3").to_s) %>
+
+test:
+  <<: *default
+  database: <%= ENV.fetch("NOTEBOOK_DB", Rails.root.join("db/test.sqlite3").to_s) %>

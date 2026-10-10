@@ -1,0 +1,13 @@
+/.bundle/
+/vendor/bundle/
+/log/*
+!/log/.keep
+/tmp/*
+!/tmp/.keep
+!/tmp/pids/
+/tmp/pids/*
+!/tmp/pids/.keep
+/db/*.sqlite3*
+/config/master.key
+/coverage/
+/.amp/

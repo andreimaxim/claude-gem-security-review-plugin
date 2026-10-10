@@ -1,0 +1,8 @@
+/gem-security-migration.tar.gz
+/.bundle/
+/vendor/
+/.amp/
+/fixture/db/*.sqlite3*
+/fixture/log/
+/fixture/tmp/
+/plugins/gem-upgrade/.claude-plugin/types/

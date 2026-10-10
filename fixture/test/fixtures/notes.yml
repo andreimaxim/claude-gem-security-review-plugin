@@ -1,0 +1,26 @@
+morning_notes:
+  id: 10
+  title: Morning plans
+  status: 0
+  archived: false
+  metadata: '{"reminder":"Buy coffee"}'
+  created_at: 2020-01-01 09:00:00
+  updated_at: 2020-01-01 09:00:00
+
+reading_list:
+  id: 20
+  title: Reading list
+  status: 1
+  archived: false
+  metadata: '{}'
+  created_at: 2020-01-02 09:00:00
+  updated_at: 2020-01-02 09:00:00
+
+old_ideas:
+  id: 30
+  title: Old ideas
+  status: 0
+  archived: true
+  metadata: '{}'
+  created_at: 2020-01-03 09:00:00
+  updated_at: 2020-01-03 09:00:00

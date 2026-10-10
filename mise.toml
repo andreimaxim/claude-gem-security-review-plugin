@@ -1,0 +1,5 @@
+[tools]
+ruby = "3.4.7"
+
+[env]
+BUNDLE_GEMFILE = "{{config_root}}/fixture/Gemfile"

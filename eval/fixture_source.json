@@ -1,0 +1,8 @@
+{
+  "repository": "https://github.com/andreimaxim/margin-notes",
+  "revision": "d63022b2d57d3ac5536953b0513b47d27b5d5e07",
+  "tree": "4051a7fe1bcbb426243698f7a600995521df7874",
+  "delivery": "local commits only; not pushed",
+  "history": "Generated Rails 7.0.8.7 API, notebook features, focused Minitest sources and guides, Rails 8.0.5 upgrade retaining 7.0 defaults, orb setup last.",
+  "verification_limit": "Tests were stopped by the owner before adding the Minitest suite, guidance and repository split. Prior two-stack/harness checks passed, but this final app revision has not been runtime-verified."
+}

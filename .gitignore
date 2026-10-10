@@ -1,0 +1,7 @@
+/gem-security-migration.tar.gz
+/.bundle/
+/vendor/
+/.amp/
+/evals/.bundle/
+/evals/vendor/
+/.claude-plugin/types/

@@ -1,0 +1,6 @@
+{
+  "name": "gem-upgrade",
+  "version": "0.1.0",
+  "description": "Research Ruby gem upgrades and their application impact.",
+  "author": { "name": "andreimaxim" }
+}

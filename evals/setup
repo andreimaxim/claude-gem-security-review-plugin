@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+# Install the SQLite-only Rails benchmark; no database daemons or credentials.
+set -euo pipefail
+cd "$(dirname "$0")"
+
+echo '== System dependencies =='
+packages=(build-essential libssl-dev libyaml-dev zlib1g-dev libffi-dev libreadline-dev libsqlite3-dev sqlite3 curl ca-certificates bubblewrap git)
+missing=()
+for package in "${packages[@]}"; do
+  dpkg-query -W -f='${Status}' "$package" 2>/dev/null | grep -q 'install ok installed' || missing+=("$package")
+done
+if ((${#missing[@]})); then
+  root=()
+  if [[ $(id -u) != 0 ]]; then root=(sudo); fi
+  "${root[@]}" apt-get update -qq
+  "${root[@]}" env DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommends "${missing[@]}"
+fi
+
+echo '== Installing mise and Ruby =='
+if [[ ! -x "$HOME/.local/bin/mise" ]]; then
+  curl --fail --silent --show-error --location https://mise.run | sh
+fi
+export PATH="$HOME/.local/bin:$PATH"
+mise trust "$PWD/mise.toml"
+mise install
+mise reshim
+export PATH="$HOME/.local/share/mise/shims:$PATH"
+activation='export PATH="$HOME/.local/share/mise/shims:$HOME/.local/bin:$PATH"'
+for profile in "$HOME/.bashrc" "$HOME/.bash_profile"; do
+  grep -Fqx "$activation" "$profile" 2>/dev/null || printf '\n%s\n' "$activation" >> "$profile"
+done
+
+echo '== Installing locked application dependencies =='
+export BUNDLE_FROZEN=true
+bundle install --gemfile="$PWD/target.Gemfile"
+
+echo '== Installing pinned Claude Code test/runtime client =='
+runtime="$HOME/.local/share/gem-upgrade-cli"
+if [[ ! -x "$runtime/node_modules/.bin/claude" ]] || [[ $("$runtime/node_modules/.bin/claude" --version) != '2.1.296 (Claude Code)' ]]; then
+  npm install --prefix "$runtime" @anthropic-ai/claude-code@2.1.296
+fi

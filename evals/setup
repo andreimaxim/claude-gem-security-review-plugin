@@ -1,17 +1,21 @@
 #!/usr/bin/env bash
-# Install the SQLite-only Rails benchmark; no database daemons or credentials.
+# Prepare the PostgreSQL/Redis application and evaluator on an Amp Orb.
 set -euo pipefail
 cd "$(dirname "$0")"
 
+application="${MARGIN_NOTES_ROOT:-$(realpath "$PWD/../../repos/margin-notes")}"
+echo '== Preparing the additional application repository =='
+"$application/.agents/setup"
+
 echo '== System dependencies =='
-packages=(build-essential libssl-dev libyaml-dev zlib1g-dev libffi-dev libreadline-dev libsqlite3-dev sqlite3 curl ca-certificates bubblewrap git)
+packages=(bubblewrap git)
 missing=()
 for package in "${packages[@]}"; do
   dpkg-query -W -f='${Status}' "$package" 2>/dev/null | grep -q 'install ok installed' || missing+=("$package")
 done
 if ((${#missing[@]})); then
   root=()
-  if [[ $(id -u) != 0 ]]; then root=(sudo); fi
+  if [[ $(id -u) != 0 ]]; then root=(sudo -E); fi
   "${root[@]}" apt-get update -qq
   "${root[@]}" env DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommends "${missing[@]}"
 fi
@@ -32,6 +36,7 @@ done
 
 echo '== Installing locked application dependencies =='
 export BUNDLE_FROZEN=true
+gem list -i bundler -v 2.6.9 >/dev/null || gem install bundler -v 2.6.9 --no-document
 bundle install --gemfile="$PWD/target.Gemfile"
 
 echo '== Installing pinned Claude Code test/runtime client =='

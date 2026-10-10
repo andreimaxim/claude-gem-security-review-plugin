@@ -1,0 +1,438 @@
+diff --git a/Gemfile b/Gemfile
+index 8be3746..97bf6c6 100644
+--- a/Gemfile
++++ b/Gemfile
+@@ -1,10 +1,10 @@
+ source "https://rubygems.org"
+ ruby "3.2.9"
+ 
+-gem "rails", "7.0.8.7"
++gem "rails", "8.1.4"
+ gem "pg", "1.5.9"
+ gem "redis", "4.8.1"
+-gem "puma", "5.6.9"
++gem "puma", "6.6.1"
+ gem "bigdecimal", "3.1.8"
+ gem "concurrent-ruby", "1.3.4"
+ gem "jbuilder", "2.13.0"
+diff --git a/Gemfile.lock b/Gemfile.lock
+index 86d74fc..dec0f39 100644
+--- a/Gemfile.lock
++++ b/Gemfile.lock
+@@ -1,85 +1,104 @@
+ GEM
+   remote: https://rubygems.org/
+   specs:
+-    actioncable (7.0.8.7)
+-      actionpack (= 7.0.8.7)
+-      activesupport (= 7.0.8.7)
++    action_text-trix (2.1.19)
++      railties
++    actioncable (8.1.4)
++      actionpack (= 8.1.4)
++      activesupport (= 8.1.4)
+       nio4r (~> 2.0)
+       websocket-driver (>= 0.6.1)
+-    actionmailbox (7.0.8.7)
+-      actionpack (= 7.0.8.7)
+-      activejob (= 7.0.8.7)
+-      activerecord (= 7.0.8.7)
+-      activestorage (= 7.0.8.7)
+-      activesupport (= 7.0.8.7)
+-      mail (>= 2.7.1)
+-      net-imap
+-      net-pop
+-      net-smtp
+-    actionmailer (7.0.8.7)
+-      actionpack (= 7.0.8.7)
+-      actionview (= 7.0.8.7)
+-      activejob (= 7.0.8.7)
+-      activesupport (= 7.0.8.7)
+-      mail (~> 2.5, >= 2.5.4)
+-      net-imap
+-      net-pop
+-      net-smtp
+-      rails-dom-testing (~> 2.0)
+-    actionpack (7.0.8.7)
+-      actionview (= 7.0.8.7)
+-      activesupport (= 7.0.8.7)
+-      rack (~> 2.0, >= 2.2.4)
++      zeitwerk (~> 2.6)
++    actionmailbox (8.1.4)
++      actionpack (= 8.1.4)
++      activejob (= 8.1.4)
++      activerecord (= 8.1.4)
++      activestorage (= 8.1.4)
++      activesupport (= 8.1.4)
++      mail (>= 2.8.0)
++    actionmailer (8.1.4)
++      actionpack (= 8.1.4)
++      actionview (= 8.1.4)
++      activejob (= 8.1.4)
++      activesupport (= 8.1.4)
++      mail (>= 2.8.0)
++      rails-dom-testing (~> 2.2)
++    actionpack (8.1.4)
++      actionview (= 8.1.4)
++      activesupport (= 8.1.4)
++      nokogiri (>= 1.8.5)
++      rack (>= 2.2.4)
++      rack-session (>= 1.0.1)
+       rack-test (>= 0.6.3)
+-      rails-dom-testing (~> 2.0)
+-      rails-html-sanitizer (~> 1.0, >= 1.2.0)
+-    actiontext (7.0.8.7)
+-      actionpack (= 7.0.8.7)
+-      activerecord (= 7.0.8.7)
+-      activestorage (= 7.0.8.7)
+-      activesupport (= 7.0.8.7)
++      rails-dom-testing (~> 2.2)
++      rails-html-sanitizer (~> 1.6)
++      useragent (~> 0.16)
++    actiontext (8.1.4)
++      action_text-trix (~> 2.1.15)
++      actionpack (= 8.1.4)
++      activerecord (= 8.1.4)
++      activestorage (= 8.1.4)
++      activesupport (= 8.1.4)
+       globalid (>= 0.6.0)
+       nokogiri (>= 1.8.5)
+-    actionview (7.0.8.7)
+-      activesupport (= 7.0.8.7)
++    actionview (8.1.4)
++      activesupport (= 8.1.4)
+       builder (~> 3.1)
+-      erubi (~> 1.4)
+-      rails-dom-testing (~> 2.0)
+-      rails-html-sanitizer (~> 1.1, >= 1.2.0)
+-    activejob (7.0.8.7)
+-      activesupport (= 7.0.8.7)
++      erubi (~> 1.11)
++      rails-dom-testing (~> 2.2)
++      rails-html-sanitizer (~> 1.6)
++    activejob (8.1.4)
++      activesupport (= 8.1.4)
+       globalid (>= 0.3.6)
+-    activemodel (7.0.8.7)
+-      activesupport (= 7.0.8.7)
+-    activerecord (7.0.8.7)
+-      activemodel (= 7.0.8.7)
+-      activesupport (= 7.0.8.7)
+-    activestorage (7.0.8.7)
+-      actionpack (= 7.0.8.7)
+-      activejob (= 7.0.8.7)
+-      activerecord (= 7.0.8.7)
+-      activesupport (= 7.0.8.7)
++    activemodel (8.1.4)
++      activesupport (= 8.1.4)
++    activerecord (8.1.4)
++      activemodel (= 8.1.4)
++      activesupport (= 8.1.4)
++      timeout (>= 0.4.0)
++    activestorage (8.1.4)
++      actionpack (= 8.1.4)
++      activejob (= 8.1.4)
++      activerecord (= 8.1.4)
++      activesupport (= 8.1.4)
+       marcel (~> 1.0)
+-      mini_mime (>= 1.1.0)
+-    activesupport (7.0.8.7)
+-      concurrent-ruby (~> 1.0, >= 1.0.2)
++    activesupport (8.1.4)
++      base64
++      bigdecimal
++      concurrent-ruby (~> 1.0, >= 1.3.1)
++      connection_pool (>= 2.2.5)
++      drb
+       i18n (>= 1.6, < 2)
++      json
++      logger (>= 1.4.2)
+       minitest (>= 5.1)
+-      tzinfo (~> 2.0)
++      securerandom (>= 0.3)
++      tzinfo (~> 2.0, >= 2.0.5)
++      uri (>= 0.13.1)
+     base64 (0.3.0)
+     bigdecimal (3.1.8)
+     builder (3.3.0)
+     concurrent-ruby (1.3.4)
++    connection_pool (3.0.2)
+     crass (1.0.7)
+     date (3.6.0)
++    drb (2.2.3)
++    erb (6.0.7)
+     erubi (1.13.1)
+     globalid (1.4.0)
+       activesupport (>= 6.1)
+     i18n (1.15.2)
+       concurrent-ruby (~> 1.0)
++    io-console (0.9.4)
++    irb (1.18.0)
++      pp (>= 0.6.0)
++      prism (>= 1.3.0)
++      rdoc (>= 4.0.0)
++      reline (>= 0.4.2)
+     jbuilder (2.13.0)
+       actionview (>= 5.0.0)
+       activesupport (>= 5.0.0)
++    json (3.0.2)
+     logger (1.7.0)
+     loofah (2.25.2)
+       crass (~> 1.0.2)
+@@ -91,7 +110,6 @@ GEM
+       net-pop
+       net-smtp
+     marcel (1.2.1)
+-    method_source (1.1.0)
+     mini_mime (1.1.5)
+     minitest (5.25.5)
+     net-imap (0.6.7)
+@@ -107,26 +125,35 @@ GEM
+     nokogiri (1.19.4-x86_64-linux-gnu)
+       racc (~> 1.4)
+     pg (1.5.9)
+-    puma (5.6.9)
++    pp (0.6.4)
++      prettyprint
++    prettyprint (0.2.1)
++    prism (1.9.0)
++    puma (6.6.1)
+       nio4r (~> 2.0)
+     racc (1.8.1)
+-    rack (2.2.24)
++    rack (3.2.7)
++    rack-session (2.1.2)
++      base64 (>= 0.1.0)
++      rack (>= 3.0.0)
+     rack-test (2.2.0)
+       rack (>= 1.3)
+-    rails (7.0.8.7)
+-      actioncable (= 7.0.8.7)
+-      actionmailbox (= 7.0.8.7)
+-      actionmailer (= 7.0.8.7)
+-      actionpack (= 7.0.8.7)
+-      actiontext (= 7.0.8.7)
+-      actionview (= 7.0.8.7)
+-      activejob (= 7.0.8.7)
+-      activemodel (= 7.0.8.7)
+-      activerecord (= 7.0.8.7)
+-      activestorage (= 7.0.8.7)
+-      activesupport (= 7.0.8.7)
++    rackup (2.3.1)
++      rack (>= 3)
++    rails (8.1.4)
++      actioncable (= 8.1.4)
++      actionmailbox (= 8.1.4)
++      actionmailer (= 8.1.4)
++      actionpack (= 8.1.4)
++      actiontext (= 8.1.4)
++      actionview (= 8.1.4)
++      activejob (= 8.1.4)
++      activemodel (= 8.1.4)
++      activerecord (= 8.1.4)
++      activestorage (= 8.1.4)
++      activesupport (= 8.1.4)
+       bundler (>= 1.15.0)
+-      railties (= 7.0.8.7)
++      railties (= 8.1.4)
+     rails-dom-testing (2.3.0)
+       activesupport (>= 5.0.0)
+       minitest
+@@ -134,19 +161,36 @@ GEM
+     rails-html-sanitizer (1.7.1)
+       loofah (~> 2.25, >= 2.25.2)
+       nokogiri (>= 1.15.7, != 1.16.7, != 1.16.6, != 1.16.5, != 1.16.4, != 1.16.3, != 1.16.2, != 1.16.1, != 1.16.0.rc1, != 1.16.0)
+-    railties (7.0.8.7)
+-      actionpack (= 7.0.8.7)
+-      activesupport (= 7.0.8.7)
+-      method_source
++    railties (8.1.4)
++      actionpack (= 8.1.4)
++      activesupport (= 8.1.4)
++      irb (~> 1.13)
++      rackup (>= 1.0.0)
+       rake (>= 12.2)
+-      thor (~> 1.0)
+-      zeitwerk (~> 2.5)
++      thor (~> 1.0, >= 1.2.2)
++      tsort (>= 0.2)
++      zeitwerk (~> 2.6)
+     rake (13.4.2)
++    rbs (4.1.3)
++      logger
++      prism (>= 1.6.0)
++      tsort
++    rdoc (8.1.0)
++      erb
++      prism (>= 1.6.0)
++      rbs (>= 4.0.0)
++      tsort
+     redis (4.8.1)
++    reline (0.7.0)
++      io-console (~> 0.5)
++    securerandom (0.4.1)
+     thor (1.5.0)
+     timeout (0.6.1)
++    tsort (0.2.0)
+     tzinfo (2.0.6)
+       concurrent-ruby (~> 1.0)
++    uri (1.1.2)
++    useragent (0.16.11)
+     websocket-driver (0.8.2)
+       base64
+       websocket-extensions (>= 0.1.0)
+@@ -162,8 +206,8 @@ DEPENDENCIES
+   jbuilder (= 2.13.0)
+   minitest (= 5.25.5)
+   pg (= 1.5.9)
+-  puma (= 5.6.9)
+-  rails (= 7.0.8.7)
++  puma (= 6.6.1)
++  rails (= 8.1.4)
+   redis (= 4.8.1)
+ 
+ RUBY VERSION
+diff --git a/app/controllers/notes_controller.rb b/app/controllers/notes_controller.rb
+index 1ee57d0..e5ee892 100644
+--- a/app/controllers/notes_controller.rb
++++ b/app/controllers/notes_controller.rb
+@@ -45,12 +45,13 @@ class NotesController < ActionController::API
+ 
+   def export
+     render json: Note.exportable(params.fetch(:limit, "10")).pluck(:id)
++  rescue ArgumentError
++    render json: { error: "Invalid export limit" }, status: :bad_request
+   end
+ 
+   def preview
+     @notes = Note.order(:id)
+     render :index
+-    head :ok
+   end
+ 
+   def cache_status
+diff --git a/app/jobs/export_job.rb b/app/jobs/export_job.rb
+index 2e915f1..1d786ba 100644
+--- a/app/jobs/export_job.rb
++++ b/app/jobs/export_job.rb
+@@ -1,5 +1,5 @@
+ class ExportJob < ActiveJob::Base
+-  retry_on IOError, wait: :exponentially_longer, attempts: 2
++  retry_on IOError, wait: :polynomially_longer, attempts: 2
+ 
+   def perform(title, amount = nil, deadline = nil)
+     raise IOError, "export destination unavailable" if title == "offline"
+diff --git a/app/models/note.rb b/app/models/note.rb
+index f6aef29..f4f9594 100644
+--- a/app/models/note.rb
++++ b/app/models/note.rb
+@@ -1,18 +1,20 @@
+ class Note < ActiveRecord::Base
+-  enum status: { draft: 0, published: 1 }
++  enum :status, { draft: 0, published: 1 }
++  attribute :delivery_mode, :integer
+   enum :delivery_mode, { immediate: 0, digest: 1 }
+-  serialize :metadata, JSON
+-  alias_attribute :caption, :title
+-  alias_attribute :export_heading, :display_title
+-  self.partial_writes = false
++  serialize :metadata, coder: JSON
++  self.partial_updates = false
++  self.partial_inserts = false
+ 
+   def title
+     "Note: #{super}"
+   end
++  alias_method :caption, :title
+ 
+   def display_title
+     "#{caption} (#{status})"
+   end
++  alias_method :export_heading, :display_title
+ 
+   def self.exportable(limit)
+     where(archived: false).limit(limit)
+@@ -27,6 +29,6 @@ class Note < ActiveRecord::Base
+   end
+ 
+   def self.publish_unique
+-    distinct.update_all(status: 1)
++    update_all(status: 1)
+   end
+ end
+diff --git a/app/services/export_preferences.rb b/app/services/export_preferences.rb
+index 1dc1d17..94e88f0 100644
+--- a/app/services/export_preferences.rb
++++ b/app/services/export_preferences.rb
+@@ -1,20 +1,20 @@
+ # Settings shared with the notebook's older export clients.
+ module ExportPreferences
+   def self.label
+-    Rails.application.secrets.export_label
++    Rails.configuration.x.export_label
+   end
+ 
+   def self.timezone
+-    ActiveRecord::Base.default_timezone
++    ActiveRecord.default_timezone
+   end
+ 
+   def self.warn_legacy_format
+-    ActiveSupport::Deprecation.warn("Notebook CSV v1 will be retired; use JSON exports.")
++    Rails.application.deprecators[:notebook_exports].warn("Notebook CSV v1 will be retired; use JSON exports.")
+     "CSV v1"
+   end
+ 
+   def self.note_form(view)
+-    view.form_with(model: nil, scope: :note, url: "/notes") do |form|
++    view.form_with(scope: :note, url: "/notes") do |form|
+       form.text_field(:title)
+     end
+   end
+diff --git a/config/application.rb b/config/application.rb
+index 4232e8a..53b22bb 100644
+--- a/config/application.rb
++++ b/config/application.rb
+@@ -15,11 +15,13 @@ module MarginNotes
+     config.secret_key_base = "local-margin-notes-development-" * 4
+     config.hosts.clear
+     config.cache_store = :redis_cache_store, {
+-      url: ENV.fetch("REDIS_URL", "redis://127.0.0.1:6379/0"), namespace: "margin-notes-#{Rails.env}"
++      url: ENV.fetch("REDIS_URL", "redis://127.0.0.1:6379/0"), namespace: "margin-notes-#{Rails.env}",
++      max_key_size: 1024
+     }
+     config.active_job.queue_adapter = :inline
+-    config.action_dispatch.show_exceptions = false
++    config.action_dispatch.show_exceptions = :none
+     config.active_support.deprecation = :stderr
++    config.x.export_label = ENV.fetch("NOTEBOOK_EXPORT_LABEL", "Margin Notes")
+     config.i18n.available_locales = [:en, :fr]
+     config.logger = ActiveSupport::Logger.new($stderr)
+   end
+diff --git a/config/initializers/deprecators.rb b/config/initializers/deprecators.rb
+new file mode 100644
+index 0000000..9f83670
+--- /dev/null
++++ b/config/initializers/deprecators.rb
+@@ -0,0 +1 @@
++Rails.application.deprecators[:notebook_exports] = ActiveSupport::Deprecation.new("2.0", "Margin Notes")
+diff --git a/config/initializers/destination_serializers.rb b/config/initializers/destination_serializers.rb
+index b584317..471a667 100644
+--- a/config/initializers/destination_serializers.rb
++++ b/config/initializers/destination_serializers.rb
+@@ -1,2 +1,3 @@
+ require Rails.root.join("app/jobs/export_destination")
+-ActiveJob::Serializers.add_serializers(LegacyDestinationSerializer, CurrentDestinationSerializer)
++# Last exact-class registration owns outbound payloads in Rails 8.1.
++ActiveJob::Serializers.add_serializers(CurrentDestinationSerializer, LegacyDestinationSerializer)
+diff --git a/config/secrets.yml b/config/secrets.yml
+deleted file mode 100644
+index 2bc0ac0..0000000
+--- a/config/secrets.yml
++++ /dev/null
+@@ -1,5 +0,0 @@
+-development:
+-  export_label: Margin Notes
+-
+-test:
+-  export_label: Margin Notes

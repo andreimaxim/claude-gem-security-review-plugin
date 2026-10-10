@@ -16,7 +16,7 @@ rescue StandardError => error
   results[id] = { "error" => error.class.name }
 end
 
-observe(results, "sqlite_cast") { NotebookWorkflows.export_timestamps.first.class.name }
+observe(results, "timestamp_cast") { NotebookWorkflows.export_timestamps.first.class.name }
 session = ActionDispatch::Integration::Session.new(Rails.application)
 observe(results, "local_cache") do
   Rails.cache.write("live-status", "old")
@@ -60,12 +60,13 @@ observe(results, "grouped_update") do
 end
 observe(results, "bulk_deprecation") do
   warnings = []
-  old = ActiveRecord.deprecator.behavior
+  deprecator = ActiveRecord.respond_to?(:deprecator) ? ActiveRecord.deprecator : ActiveSupport::Deprecation
+  old = deprecator.behavior
   begin
-    ActiveRecord.deprecator.behavior = ->(message, *) { warnings << message }
+    deprecator.behavior = ->(message, *) { warnings << message }
     Note.publish_unique
   ensure
-    ActiveRecord.deprecator.behavior = old
+    deprecator.behavior = old
   end
   warnings.any? { |message| message.include?("distinct") && message.include?("8.2") }
 end
@@ -75,7 +76,18 @@ observe(results, "delete_multi") do
 end
 observe(results, "head_after_render") do
   session.get("/preview.json")
-  session.response.status
+  status = session.response.status
+  exception = nil
+  original = Rails.application.env_config["action_dispatch.show_exceptions"]
+  begin
+    Rails.application.env_config["action_dispatch.show_exceptions"] = Rails::VERSION::MAJOR >= 8 ? :none : false
+    session.get("/preview.json")
+  rescue AbstractController::DoubleRenderError => error
+    exception = error.class.name
+  ensure
+    Rails.application.env_config["action_dispatch.show_exceptions"] = original
+  end
+  { "status" => status, "exception" => exception }
 end
 
 observe(results, "sql_boolean") { [true, false].map { |value| NotebookWorkflows.sql_boolean(value) } }
@@ -94,7 +106,7 @@ end
 observe(results, "nil_separator") { NotebookWorkflows.export_slug("Donald E. Knuth") }
 
 observe(results, "cache_format_control") { ActiveSupport::Cache.format_version }
-observe(results, "strict_sqlite_control") { connection.select_value('SELECT "literal"') }
+observe(results, "quoted_literal_control") { connection.select_value("SELECT 'literal'") }
 observe(results, "strong_params_control") do
   ActionController::Parameters.new(note: { title: "a", extra: "b" }).require(:note).permit(:title).to_h
 end
@@ -104,20 +116,47 @@ observe(results, "sse_control") do
   session.get("/stream")
   session.response.body
 end
-observe(results, "job_zone_control") do
+observe(results, "job_zone") do
   deadline = Time.find_zone!("Asia/Tokyo").local(2020, 1, 1)
   job = NotebookWorkflows.build_export("zone", amount: BigDecimal("1.25"), deadline: deadline)
   # Observe the actual inline adapter's deserialize-and-execute path.
   captured = nil
-  ExportJob.around_perform do |instance, block|
+  callback = ->(instance, block) do
     captured = instance.arguments[2].time_zone.name
     block.call
   end
-  job.enqueue
-  captured
+  ExportJob.around_perform(callback)
+  begin
+    job.enqueue
+    captured
+  ensure
+    ExportJob.skip_callback(:perform, :around, callback)
+  end
 end
 observe(results, "json_escape_control") do
   ActiveSupport::JSON.encode({ "text" => "line\u2028break" }).include?("\\u2028")
+end
+
+observe(results, "caption_alias") { Note.new(title: "Example").caption }
+observe(results, "legacy_label") { ExportPreferences.label }
+observe(results, "global_timezone") { ExportPreferences.timezone.to_s }
+observe(results, "global_warning") { ExportPreferences.warn_legacy_format }
+observe(results, "nil_form") do
+  ExportPreferences.note_form(NotesController.new.view_context).include?('name="note[title]"')
+end
+observe(results, "retry_wait") do
+  original = ExportJob.queue_adapter
+  begin
+    ExportJob.queue_adapter = :test
+    ExportJob.perform_now("offline")
+    ExportJob.queue_adapter.enqueued_jobs.size
+  ensure
+    ExportJob.queue_adapter = original
+  end
+end
+observe(results, "exception_policy") do
+  session.get("/notes/99999")
+  session.response.status
 end
 
 # Boot/CRUD checks are prerequisites, not extra counted upgrade issues.
@@ -127,5 +166,5 @@ session.post("/notes", params: { note: { title: "boot" } })
 raise "Note creation failed" unless session.response.status == 302 && Note.where(title: "boot").count == 1
 session.get("/notes.json")
 body = JSON.parse(session.response.body)
-raise "Jbuilder listing failed" unless session.response.status == 200 && body.fetch("notes").map { |note| note.fetch("caption") } == %w[stream zone boot]
+raise "Jbuilder listing failed" unless session.response.status == 200 && body.fetch("notes").size == 3
 puts JSON.generate(results)

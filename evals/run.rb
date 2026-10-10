@@ -56,7 +56,8 @@ begin
       File.open(File.join(output, "stderr.log"), "wx") do |errors|
         Open3.popen3(WorkerSandbox.environment, *isolated, unsetenv_others: true, pgroup: true) do |input, stream, error_stream, wait|
           drain = Thread.new { IO.copy_stream(error_stream, errors) }
-          request = { type: "user", parent_tool_use_id: nil, message: { role: "user", content: "Use the gem-upgrade research tool exactly once for #{JSON.generate(item.fetch('request'))}. Wait for its completed report, then summarize it. Do not research independently, retry, or modify files." } }
+          upgrade = item.fetch("request")
+          request = { type: "user", parent_tool_use_id: nil, message: { role: "user", content: "Research the application impact of upgrading #{upgrade.fetch('gem')} from #{upgrade.fetch('currentVersion')} to #{upgrade.fetch('requestedVersion')}. Use the gem-upgrade research tool once and wait for its report." } }
           input.puts(JSON.generate(request))
           input.flush
           research = ResearchTrace.new(item.fetch("request"))

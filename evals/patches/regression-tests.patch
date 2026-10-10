@@ -1,0 +1,308 @@
+diff --git a/test/controllers/notes_controller_test.rb b/test/controllers/notes_controller_test.rb
+index f917b3a..3c7da95 100644
+--- a/test/controllers/notes_controller_test.rb
++++ b/test/controllers/notes_controller_test.rb
+@@ -34,4 +34,92 @@ class NotesControllerTest < ActionDispatch::IntegrationTest
+     assert_equal 4, listed.size
+     assert_equal created.id, listed.last["id"]
+   end
++
++  test "preview returns the rendered notebook" do
++    get "/preview.json"
++
++    assert_response :success
++    assert_equal 3, response.parsed_body["notes"].size
++    assert_equal "Note: Morning plans", response.parsed_body["notes"].first["caption"]
++  end
++
++  test "invalid export limits return a bad request" do
++    get "/export", params: { limit: "invalid" }
++
++    assert_response :bad_request
++    assert_equal "Invalid export limit", response.parsed_body["error"]
++  end
++
++  test "numeric export limits select only eligible notes" do
++    get "/export", params: { limit: "10" }
++
++    assert_response :success
++    assert_equal 2, response.parsed_body.size
++    assert_equal [10, 20], response.parsed_body.sort
++  end
++
++  test "invalidly encoded parameter names are rejected as bad requests" do
++    # This app propagates exceptions in tests rather than rendering error pages.
++    assert_raises(ActionController::BadRequest) do
++      get "/notes?%FF=value"
++    end
++  end
++
++  test "blank locales do not add an empty URL segment" do
++    get "/products/123", params: { locale: "" }
++
++    assert_response :success
++    assert_equal "/products/123", response.parsed_body["url"]
++  end
++
++  test "freshness accepts legacy HTTP dates and serves newer content" do
++    get "/freshness", headers: { "If-Modified-Since" => "Sunday, 06-Nov-94 08:49:37 GMT" }
++
++    assert_response :not_modified
++    assert_empty response.body
++
++    get "/freshness", headers: { "If-Modified-Since" => "Sat, 05 Nov 1994 08:49:37 GMT" }
++
++    assert_response :success
++    assert_equal "updated", response.parsed_body["status"]
++  end
++
++  test "stream emits a complete notes event" do
++    get "/stream"
++
++    assert_response :success
++    assert_equal "text/event-stream", response.media_type
++    assert_equal "event: notes\nid: latest\ndata: {\"count\":3}\n\n", response.body
++  end
++
++  test "export settings retain the notebook label and UTC database times" do
++    get "/export-preferences"
++
++    assert_response :success
++    assert_equal({ "label" => "Margin Notes", "timezone" => "utc" }, response.parsed_body)
++  end
++
++  test "older export clients receive their format without crashing" do
++    get "/legacy-export"
++
++    assert_response :success
++    assert_equal "CSV v1", response.parsed_body["format"]
++    assert_equal [10, 20, 30], response.parsed_body["notes"]
++  end
++
++  test "compose fragments submit note titles to the creation endpoint" do
++    get "/compose"
++    form = Nokogiri::HTML.fragment(response.parsed_body["form"]).at_css("form")
++
++    assert_response :success
++    assert_equal "/notes", form["action"]
++    assert_equal "post", form["method"]
++    assert_equal "note[title]", form.at_css("input[type=text]")["name"]
++  end
++
++  test "missing notes propagate their exception in the test environment" do
++    assert_raises(ActiveRecord::RecordNotFound) do
++      get "/notes/99999"
++    end
++  end
+ end
+diff --git a/test/jobs/export_destination_test.rb b/test/jobs/export_destination_test.rb
+new file mode 100644
+index 0000000..a740624
+--- /dev/null
++++ b/test/jobs/export_destination_test.rb
+@@ -0,0 +1,15 @@
++require "test_helper"
++
++class ExportDestinationTest < ActiveSupport::TestCase
++  test "destination payloads preserve the legacy client's format" do
++    payload = ActiveJob::Arguments.serialize([ExportDestination.new("archive")]).first
++
++    assert_equal "archive", payload["name"]
++    assert_equal "legacy", payload["format"]
++    assert_equal ExportDestination.new("archive"), ActiveJob::Arguments.deserialize([payload]).first
++
++    current_payload = CurrentDestinationSerializer.instance.serialize(ExportDestination.new("inbox"))
++
++    assert_equal ExportDestination.new("inbox"), ActiveJob::Arguments.deserialize([current_payload]).first
++  end
++end
+diff --git a/test/jobs/export_job_test.rb b/test/jobs/export_job_test.rb
+new file mode 100644
+index 0000000..e70da48
+--- /dev/null
++++ b/test/jobs/export_job_test.rb
+@@ -0,0 +1,23 @@
++require "test_helper"
++
++class ExportJobTest < ActiveJob::TestCase
++  def queue_adapter_for_test
++    ActiveJob::QueueAdapters::TestAdapter.new
++  end
++
++  test "export serialization preserves the caller's deadline timezone" do
++    deadline = Time.find_zone!("Asia/Tokyo").local(2020, 1, 1)
++
++    perform_enqueued_jobs do
++      NotebookWorkflows.build_export("zone", amount: BigDecimal("1.25"), deadline: deadline).enqueue
++    end
++
++    assert_equal "2020-01-01T00:00:00+09:00", Note.find_by!("title = ?", "zone").metadata["deadline"]
++  end
++
++  test "unavailable export destinations schedule a retry" do
++    assert_enqueued_with(job: ExportJob) do
++      ExportJob.perform_now("offline")
++    end
++  end
++end
+diff --git a/test/models/note_test.rb b/test/models/note_test.rb
+index 4ed7411..9a94c2c 100644
+--- a/test/models/note_test.rb
++++ b/test/models/note_test.rb
+@@ -1,6 +1,9 @@
+ require "test_helper"
++require "active_support/testing/deprecation"
+ 
+ class NoteTest < ActiveSupport::TestCase
++  include ActiveSupport::Testing::Deprecation
++
+   test "archived notes stay out of exports" do
+     draft = notes(:morning_notes)
+     archived = notes(:old_ideas)
+@@ -19,4 +22,52 @@ class NoteTest < ActiveSupport::TestCase
+ 
+     assert_equal({ "tags" => ["personal", "weekend"], "priority" => 2 }, note.metadata)
++    assert_not Note.partial_updates
++    assert_not Note.partial_inserts
+   end
++
++  test "average title length counts each distinct length once" do
++    Note.delete_all
++    %w[a b ccccc].each { |title| Note.create!(title: title) }
++
++    assert_in_delta 3.0, Note.average_title_length, 0.000001
++  end
++
++  test "archiving a group leaves other notes untouched" do
++    selected = notes(:morning_notes)
++    other = notes(:reading_list)
++
++    Note.archive_group(selected.id)
++
++    assert selected.reload.archived?
++    assert_not other.reload.archived?
++  end
++
++  test "bulk publication supports a filtered scope without deprecations" do
++    selected = notes(:morning_notes)
++    other = notes(:old_ideas)
++
++    assert_no_changes -> { other.reload.status } do
++      assert_not_deprecated(ActiveRecord.deprecator) do
++        Note.where(id: selected.id).publish_unique
++      end
++    end
++
++    assert selected.reload.published?
++  end
++
++  test "delivery choices are transient and do not overwrite stored status" do
++    note = notes(:morning_notes)
++
++    note.delivery_mode = :digest
++    note.save!
++
++    assert note.digest?
++    assert note.draft?
++    assert_nil note.reload.delivery_mode
++    assert note.draft?
++  end
++
++  test "export headings include the displayed caption and status" do
++    assert_equal "Note: Morning plans (draft)", notes(:morning_notes).export_heading
++  end
+ end
+diff --git a/test/services/notebook_workflows_test.rb b/test/services/notebook_workflows_test.rb
+new file mode 100644
+index 0000000..a8ad6cf
+--- /dev/null
++++ b/test/services/notebook_workflows_test.rb
+@@ -0,0 +1,88 @@
++require "test_helper"
++
++class NotebookWorkflowsTest < ActiveSupport::TestCase
++  setup do
++    Rails.cache.delete_multi(["expired", "retained", "x" * 300 + "/notes/123", "x" * 300 + "/users/123"])
++  end
++
++  teardown do
++    Rails.cache.delete_multi(["expired", "retained", "x" * 300 + "/notes/123", "x" * 300 + "/users/123"])
++  end
++
++  test "timestamp exports contain UTC times in note order" do
++    timestamps = NotebookWorkflows.export_timestamps
++
++    assert_equal [Time.utc(2020, 1, 1, 9), Time.utc(2020, 1, 2, 9), Time.utc(2020, 1, 3, 9)], timestamps
++  end
++
++  test "expiry removes long note export keys but preserves unrelated entries" do
++    key = "x" * 300 + "/notes/123"
++    NotebookWorkflows.cache_export(key, "export")
++    NotebookWorkflows.cache_export("x" * 300 + "/users/123", "profile")
++
++    NotebookWorkflows.expire_note_exports
++
++    assert_nil Rails.cache.read(key)
++    assert_equal "profile", Rails.cache.read("x" * 300 + "/users/123")
++  end
++
++  test "expiry accepts frozen caller keys and preserves other exports" do
++    keys = ["expired"].freeze
++    NotebookWorkflows.cache_export("expired", "old")
++    NotebookWorkflows.cache_export("retained", "new")
++
++    NotebookWorkflows.expire_exports(keys)
++
++    assert_nil Rails.cache.read("expired")
++    assert_equal "new", Rails.cache.read("retained")
++    assert_equal ["expired"], keys
++  end
++
++  test "stream writes retain their bytes when the caller reuses a buffer" do
++    response = ActionDispatch::Response.new
++    buffer = +"é"
++
++    bytes = NotebookWorkflows.write_chunk(response.stream, buffer)
++    buffer.replace("changed")
++
++    assert_equal 2, bytes
++    assert_equal "é", response.body
++  end
++
++  test "quoted SQL booleans retain their meaning in PostgreSQL exports" do
++    connection = Note.connection
++
++    assert_equal true, connection.select_value("SELECT #{NotebookWorkflows.sql_boolean(true)}")
++    assert_equal false, connection.select_value("SELECT #{NotebookWorkflows.sql_boolean(false)}")
++  end
++
++  test "elapsed minutes preserve fractional seconds" do
++    assert_in_delta 1.5083333333333333, NotebookWorkflows.elapsed_minutes(90.5), 0.000001
++  end
++
++  test "deadline advances accept frozen fractional options" do
++    options = { days: 1.5 }.freeze
++
++    deadline = NotebookWorkflows.advance_deadline(Time.utc(2020, 1, 1), options)
++
++    assert_equal Time.utc(2020, 1, 2, 12), deadline
++    assert_equal({ days: 1.5 }, options)
++  end
++
++  test "author names survive filtering of string keyed attributes" do
++    assert_equal "Ada", NotebookWorkflows.author_name({ "name" => "Ada", "role" => "editor" })
++  end
++
++  test "export slugs omit punctuation without inserting separators" do
++    assert_equal "donaldeknuth", NotebookWorkflows.export_slug("Donald E. Knuth")
++  end
++end
++
++class IsolatedExportTest < ActiveSupport::TestCase
++  # The workflow starts its own isolation transaction, outside fixture transactions.
++  self.use_transactional_tests = false
++
++  test "nested export reads use the same isolation" do
++    assert_equal 3, NotebookWorkflows.isolated_export(Note.connection)
++  end
++end

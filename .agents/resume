@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+set -euo pipefail
+cd "$(dirname "$0")/.."
+application="${MARGIN_NOTES_ROOT:-$(realpath "$PWD/../repos/margin-notes")}"
+exec "$application/.agents/services"

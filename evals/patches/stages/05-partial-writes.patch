@@ -1,0 +1,14 @@
+diff --git a/app/models/note.rb b/app/models/note.rb
+index b0a9429..2da22f9 100644
+--- a/app/models/note.rb
++++ b/app/models/note.rb
+@@ -4,7 +4,8 @@ class Note < ActiveRecord::Base
+   serialize :metadata, coder: JSON
+   alias_attribute :caption, :title
+   alias_attribute :export_heading, :display_title
+-  self.partial_writes = false
++  self.partial_updates = false
++  self.partial_inserts = false
+ 
+   def title
+     "Note: #{super}"

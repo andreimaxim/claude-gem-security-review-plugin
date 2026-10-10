@@ -37,7 +37,7 @@ hooks = JSON.parse(File.read(hooks_path))
 hooks["modules"] << "./observe.ts"
 File.write(hooks_path, JSON.pretty_generate(hooks) + "\n")
 
-cases = (["rails"] + ANSWER_KEY["issues"].map { |item| item["gem"] }.uniq.sort).map do |gem|
+cases = (["rails"] + ANSWER_KEY["issues"].map { |item| item["gem"] }.uniq.sort).uniq.map do |gem|
   { "id" => gem, "request" => { "gem" => gem, "currentVersion" => ANSWER_KEY.fetch("baseline_rails"), "requestedVersion" => ANSWER_KEY.fetch("target_rails") }, "control" => false }
 end
 cases << { "id" => "jbuilder-same-version", "request" => { "gem" => "jbuilder", "currentVersion" => "2.13.0", "requestedVersion" => "2.13.0" }, "control" => true }

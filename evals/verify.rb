@@ -13,13 +13,27 @@ sources = JSON.parse(File.read(File.join(__dir__, "sources.json")))
 sources.each do |source|
   path = File.join(__dir__, source.fetch("path"))
   abort "Changed source: #{path}" unless Digest::SHA256.file(path).hexdigest == source.fetch("sha256")
-  expected_url = "https://raw.githubusercontent.com/rails/rails/" + source["path"].delete_prefix("evidence/")
-  abort "Source URL/path mismatch" unless source["url"] == expected_url
+  suffix = "#{source.fetch('repository')}/#{source.fetch('tag')}/#{source.fetch('file')}"
+  abort "Source URL/path mismatch" unless source["url"] == "https://raw.githubusercontent.com/#{suffix}" && source["path"] == "evidence/#{suffix}"
 end
 items.each do |item|
-  files = [ANSWER_KEY.fetch("baseline_rails"), ANSWER_KEY.fetch("target_rails")].map { |version| "evidence/v#{version}/#{item.fetch('source')}" }
-  abort "Missing tagged source pair: #{item['id']}" unless files.all? { |path| sources.any? { |source| source["path"] == path } }
-  abort "Source anchor missing: #{item['id']}" unless files.any? { |path| File.read(File.join(__dir__, path)).include?(item.fetch("anchor")) }
+  required = if item["source"]
+    [ANSWER_KEY.fetch("baseline_rails"), ANSWER_KEY.fetch("target_rails")].map do |version|
+      { "repository" => "rails/rails", "tag" => "v#{version}", "file" => item.fetch("source") }
+    end
+  else
+    []
+  end
+  required += item.fetch("external_evidence", [])
+  abort "No source evidence: #{item['id']}" if required.empty?
+  files = required.map do |ref|
+    source = sources.find { |entry| ref.all? { |field, value| entry[field] == value } }
+    abort "Missing tagged source: #{item['id']} #{ref.inspect}" unless source
+    File.join(__dir__, source.fetch("path"))
+  end
+  # Removed APIs need not leave an anchor in the new tag. Runtime reproduction
+  # and semantic review, not this existence check, establish the change.
+  abort "Source anchor missing: #{item['id']}" if item["anchor"] && !files.any? { |path| File.read(path).include?(item.fetch("anchor")) }
 end
 
 JSON.parse(File.read(File.join(__dir__, "freeze.json"))).each do |path, hash|

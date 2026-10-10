@@ -1,0 +1,11 @@
+diff --git a/app/models/note.rb b/app/models/note.rb
+index 2da22f9..af56fe1 100644
+--- a/app/models/note.rb
++++ b/app/models/note.rb
+@@ -1,5 +1,6 @@
+ class Note < ActiveRecord::Base
+   enum :status, { draft: 0, published: 1 }
++  attribute :delivery_mode, :integer
+   enum :delivery_mode, { immediate: 0, digest: 1 }
+   serialize :metadata, coder: JSON
+   alias_attribute :caption, :title

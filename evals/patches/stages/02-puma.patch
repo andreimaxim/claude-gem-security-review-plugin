@@ -1,0 +1,35 @@
+diff --git a/Gemfile b/Gemfile
+index f1ba5d3..97bf6c6 100644
+--- a/Gemfile
++++ b/Gemfile
+@@ -4,7 +4,7 @@ ruby "3.2.9"
+ gem "rails", "8.1.4"
+ gem "pg", "1.5.9"
+ gem "redis", "4.8.1"
+-gem "puma", "5.6.9"
++gem "puma", "6.6.1"
+ gem "bigdecimal", "3.1.8"
+ gem "concurrent-ruby", "1.3.4"
+ gem "jbuilder", "2.13.0"
+diff --git a/Gemfile.lock b/Gemfile.lock
+index 452e70c..dec0f39 100644
+--- a/Gemfile.lock
++++ b/Gemfile.lock
+@@ -129,7 +129,7 @@ GEM
+       prettyprint
+     prettyprint (0.2.1)
+     prism (1.9.0)
+-    puma (5.6.9)
++    puma (6.6.1)
+       nio4r (~> 2.0)
+     racc (1.8.1)
+     rack (3.2.7)
+@@ -206,7 +206,7 @@ DEPENDENCIES
+   jbuilder (= 2.13.0)
+   minitest (= 5.25.5)
+   pg (= 1.5.9)
+-  puma (= 5.6.9)
++  puma (= 6.6.1)
+   rails (= 8.1.4)
+   redis (= 4.8.1)
+ 

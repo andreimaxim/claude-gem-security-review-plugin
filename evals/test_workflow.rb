@@ -50,8 +50,8 @@ Dir.mktmpdir("notebook-harness-") do |dir|
   File.write(executable, <<~SH)
     #!/bin/bash
     read -r request || exit 2
-    echo '{"type":"assistant","message":{"content":[{"type":"tool_use","id":"call-1","name":"mcp__gem-upgrade__research","input":{"gem":"rails","currentVersion":"8.0.5","requestedVersion":"8.1.4"}}]}}'
-    echo '{"type":"user","message":{"content":[{"type":"tool_result","tool_use_id":"call-1","content":"Research started for rails 8.0.5 → 8.1.4 (agent worker-1)."}]}}'
+    echo '{"type":"assistant","message":{"content":[{"type":"tool_use","id":"call-1","name":"mcp__gem-upgrade__research","input":{"gem":"rails","currentVersion":"7.0.8.7","requestedVersion":"8.1.4"}}]}}'
+    echo '{"type":"user","message":{"content":[{"type":"tool_result","tool_use_id":"call-1","content":"Research started for rails 7.0.8.7 → 8.1.4 (agent worker-1)."}]}}'
     echo '{"type":"result","result_index":0,"is_error":false}'
     read -r -t 0.05 unexpected
     code=$?
@@ -72,7 +72,7 @@ Dir.mktmpdir("notebook-harness-") do |dir|
   FileUtils.cp(File.join(packages.first, "manifest.json"), File.join(run, "manifest.json"))
   File.write(File.join(run, "request.json"), JSON.generate(item))
   tool = { "type" => "assistant", "message" => { "content" => [{ "type" => "tool_use", "id" => "call-1", "name" => "mcp__gem-upgrade__research", "input" => item.fetch("request") }] } }
-  acknowledgement = {"type" => "user", "message" => {"content" => [{"type" => "tool_result", "tool_use_id" => "call-1", "content" => "Research started for activesupport 8.0.5 → 8.1.4 (agent worker-1)."}]}}
+  acknowledgement = {"type" => "user", "message" => {"content" => [{"type" => "tool_result", "tool_use_id" => "call-1", "content" => "Research started for activesupport 7.0.8.7 → 8.1.4 (agent worker-1)."}]}}
   events = [tool, tool, {"type" => "result", "total_cost_usd" => 1},
             acknowledgement,
             {"subtype" => "task_notification", "task_id" => "worker-1", "status" => "completed", "summary" => "Source-linked report"},

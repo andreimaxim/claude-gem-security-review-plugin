@@ -13,6 +13,8 @@ module EvaluationApplication
     end
     _out, errors, status = Open3.capture3("git", "-C", app, "diff", "--quiet", "HEAD", "--")
     abort "Application has tracked changes: #{errors}" unless status.success?
+    files, errors, status = Open3.capture3("git", "-C", app, "ls-files", "--others", "--exclude-standard", "-z")
+    abort "Application has untracked files: #{errors}" unless status.success? && files.empty?
     app
   end
 end

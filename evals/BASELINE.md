@@ -29,7 +29,11 @@ Rack 2; this is not a claim that every valid Rails 8.1 stack requires newer Puma
 The checked application uses PostgreSQL 15.19 and Redis 7.0.15 in the Orb.
 The system packages install the distribution's server versions, not a frozen
 production image. Server-version changes require rerunning the runtime check.
-The app uses inline Active Job execution; Redis backs its cache, not a job queue.
+The app uses async Active Job execution; Redis backs its cache, not a job queue.
+The deadline probe uses Rails' test queue to drain a serialized job
+deterministically. The retry probe executes the job with the real async queue
+and checks successful retry enqueueing. This queue is not durable across process
+restarts.
 Its development signing key and permissive hosts are not production settings.
 
 ## Reproduced impacts
@@ -41,7 +45,8 @@ untyped virtual enums and aliases targeting ordinary methods. After repairing
 those prerequisites, 15 scored observations cover queries, rendering, routing,
 Redis keys, job serialization/retries and export preferences. Scored methods have
 application callers. Cache expiry, statistics, archiving, publication, destination
-serialization and job deadlines are reproduced through HTTP requests.
+serialization and job deadlines are reproduced through HTTP requests. Retry
+failures are observed at the job execution boundary with the real queue adapter.
 
 Ten additional diagnostics are recorded without adding scored issues: SSE write
 batching, buffer ownership, limit-validation timing, frozen cache arrays, nested

@@ -34,7 +34,7 @@ ROWS = [
   ["global_timezone", "activerecord", "Global settings delegation through ActiveRecord::Base is removed", "app/services/export_preferences.rb", "utc", {"error" => "NoMethodError"}, "activerecord/lib/active_record/core.rb", "default_timezone"],
   ["global_warning", "activesupport", "Global deprecation singleton delegation is removed", "app/services/export_preferences.rb", "CSV v1", {"error" => "NoMethodError"}, "activesupport/lib/active_support/deprecation.rb", "class Deprecation"],
   ["nil_form", "actionview", "Compose form rejects an explicitly nil model", "app/services/export_preferences.rb", true, {"error" => "ArgumentError"}, "actionview/lib/action_view/helpers/form_helper.rb", "def form_with"],
-  ["retry_wait", "activejob", "Exponentially_longer retry selector is removed", "app/jobs/export_job.rb", 1, {"error" => "RuntimeError"}, "activejob/lib/active_job/exceptions.rb", "determine_delay"],
+  ["retry_wait", "activejob", "Exponentially_longer retry selector is removed", "app/jobs/export_job.rb", true, {"error" => "RuntimeError"}, "activejob/lib/active_job/exceptions.rb", "determine_delay"],
   ["exception_policy", "actionpack", "Boolean false no longer means propagate request exceptions", "config/application.rb", {"error" => "ActiveRecord::RecordNotFound"}, 404, "actionpack/lib/action_dispatch/middleware/show_exceptions.rb", "show_exceptions?"],
 ].freeze
 
@@ -100,7 +100,7 @@ CONTROL_ROWS = [
 ].freeze
 
 ANSWER_KEY = {
-  "version" => 3, "requested_positive_count" => 21, "status" => "complete",
+  "version" => 4, "requested_positive_count" => 21, "status" => "complete",
   "baseline_rails" => "7.0.8.7", "target_rails" => "8.1.4", "ruby" => "3.2.9", "defaults" => "7.0",
   "issues" => issues,
   "diagnostics" => diagnostics,

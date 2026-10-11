@@ -147,7 +147,7 @@ ruby summarize.rb /tmp/notebook-run-01
 The runner keeps streaming stdin open until worker completion and the main
 follow-up, matches the three tool inputs, and binds the report to the acknowledged
 worker ID. It requires the exact ID-bearing completion payload in a successful
-task-notification-origin result, joining events in either order. An explicit
+`gem-upgrade` plugin-origin result, joining events in either order. An explicit
 conflicting run ID is rejected. This verifies functional report delivery, not
 authenticated producer provenance. It retains raw traces, request, manifest,
 native main/subagent JSONL transcripts, stderr, timing and handoff state.

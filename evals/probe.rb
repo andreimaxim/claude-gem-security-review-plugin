@@ -126,11 +126,18 @@ observe(results, "sse_control") do
   session.response.body
 end
 observe(results, "job_zone") do
-  session.post("/exports", params: { export: {
-    title: "zone", amount: "1.25", deadline: "2020-01-01 00:00:00", time_zone: "Asia/Tokyo"
-  } })
-  raise "Export creation failed" unless session.response.status == 201
-  Note.find_by!("title = ?", "zone").metadata.fetch("deadline")
+  original = ExportJob.queue_adapter
+  begin
+    ExportJob.queue_adapter = :test
+    session.post("/exports", params: { export: {
+      title: "zone", amount: "1.25", deadline: "2020-01-01 00:00:00", time_zone: "Asia/Tokyo"
+    } })
+    raise "Export creation failed" unless session.response.status == 201
+    ExportJob.execute(ExportJob.queue_adapter.enqueued_jobs.shift)
+    Note.find_by!("title = ?", "zone").metadata.fetch("deadline")
+  ensure
+    ExportJob.queue_adapter = original
+  end
 end
 observe(results, "json_escape_control") do
   ActiveSupport::JSON.encode({ "text" => "line\u2028break" }).include?("\\u2028")
@@ -146,13 +153,10 @@ end
 observe(results, "retry_wait") do
   original = ExportJob.queue_adapter
   begin
-    ExportJob.queue_adapter = :test
-    session.post("/exports", params: { export: {
-      title: "offline", amount: "1.25", deadline: "2020-01-01T00:00:00Z"
-    } })
-    raise "Retry export submission failed" unless session.response.status == 201
-    ExportJob.execute(ExportJob.queue_adapter.enqueued_jobs.shift)
-    ExportJob.queue_adapter.enqueued_jobs.size
+    ExportJob.queue_adapter = :async
+    job = ExportJob.new("offline", BigDecimal("1.25"), Time.utc(2020))
+    job.perform_now
+    job.successfully_enqueued?
   ensure
     ExportJob.queue_adapter = original
   end

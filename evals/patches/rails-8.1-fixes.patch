@@ -416,7 +416,7 @@ index 4232e8a..53b22bb 100644
 +      url: ENV.fetch("REDIS_URL", "redis://127.0.0.1:6379/0"), namespace: "margin-notes-#{Rails.env}",
 +      max_key_size: 1024
      }
-     config.active_job.queue_adapter = :inline
+     config.active_job.queue_adapter = :async
 -    config.action_dispatch.show_exceptions = false
 +    config.action_dispatch.show_exceptions = :none
      config.active_support.deprecation = :stderr

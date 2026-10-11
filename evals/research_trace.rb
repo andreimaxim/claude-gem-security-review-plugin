@@ -35,7 +35,7 @@ class ResearchTrace
       @handoff_result = @turn_results.find do |result|
         origin = result["origin"]
         next false unless result["subtype"] == "success" && result["is_error"] == false &&
-          origin.is_a?(Hash) && origin["kind"] == "task-notification" && result["result"] == payload
+          origin.is_a?(Hash) && origin["kind"] == "plugin" && origin["name"] == "gem-upgrade" && result["result"] == payload
         !origin.key?("runId") || (origin["runId"].is_a?(String) && !origin["runId"].empty? &&
           origin["runId"] == @notification["run_id"])
       end

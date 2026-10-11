@@ -48,7 +48,7 @@ Dir.mktmpdir("notebook-harness-") do |dir|
   File.write(File.join(run, "execution.json"), JSON.generate("status" => "completed"))
   _out, _errors, status = Open3.capture3("ruby", File.join(__dir__, "summarize.rb"), run)
   assert(!status.success?, "Uncorrelated or earlier result accepted as handoff")
-  events.last["origin"] = { "kind" => "task-notification", "runId" => "unrelated-run" }
+  events.last["origin"] = { "kind" => "plugin", "name" => "gem-upgrade", "runId" => "unrelated-run" }
   File.write(File.join(run, "trace.jsonl"), events.map { |event| JSON.generate(event) }.join("\n") + "\n")
   _out, _errors, status = Open3.capture3("ruby", File.join(__dir__, "summarize.rb"), run)
   assert(!status.success?, "Another worker's handoff accepted")
@@ -64,8 +64,11 @@ Dir.mktmpdir("notebook-harness-") do |dir|
     valid_result.merge("result" => payload.delete_suffix("report")),
     valid_result.merge("origin" => nil),
     valid_result.merge("origin" => {"kind" => "human"}),
-    valid_result.merge("origin" => {"kind" => "task-notification", "runId" => nil}),
-    valid_result.merge("origin" => {"kind" => "task-notification", "runId" => "other-run"}),
+    valid_result.merge("origin" => {"kind" => "task-notification"}),
+    valid_result.merge("origin" => {"kind" => "plugin"}),
+    valid_result.merge("origin" => {"kind" => "plugin", "name" => "other-plugin"}),
+    valid_result.merge("origin" => {"kind" => "plugin", "name" => "gem-upgrade", "runId" => nil}),
+    valid_result.merge("origin" => {"kind" => "plugin", "name" => "gem-upgrade", "runId" => "other-run"}),
     valid_result.merge("is_error" => true),
     valid_result.merge("subtype" => "error_during_execution")
   ].each do |invalid|
@@ -75,7 +78,7 @@ Dir.mktmpdir("notebook-harness-") do |dir|
     assert(!status.success?, "Malformed or unrelated handoff accepted: #{invalid.inspect}")
   end
   [true, false].each do |with_run_id|
-    events[-1] = valid_result.merge("origin" => with_run_id ? valid_result["origin"] : {"kind" => "task-notification"})
+    events[-1] = valid_result.merge("origin" => with_run_id ? valid_result["origin"] : {"kind" => "plugin", "name" => "gem-upgrade"})
     [events, events.values_at(0, 1, 2, 3, 6, 5, 4)].each do |ordered|
       File.write(File.join(run, "trace.jsonl"), ordered.map { |event| JSON.generate(event) }.join("\n") + "\n")
       _out, _errors, status = Open3.capture3("ruby", File.join(__dir__, "summarize.rb"), run)

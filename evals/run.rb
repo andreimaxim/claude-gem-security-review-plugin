@@ -47,7 +47,7 @@ abort "Output must be outside worker mounts" if [plugin, runtime].any? { |path| 
 FileUtils.mkdir_p(output)
 File.write(File.join(output, "request.json"), JSON.pretty_generate(item) + "\n")
 FileUtils.cp(File.join(package, "manifest.json"), File.join(output, "manifest.json"))
-command = ["/usr/bin/node", "/opt/claude/sdk-runner.mjs"]
+command = ["/usr/bin/env", "node", "/opt/claude/sdk-runner.mjs"]
 started = Process.clock_gettime(Process::CLOCK_MONOTONIC)
 state = { "started_at" => Time.now.utc.iso8601, "command" => command, "status" => "execution_failure", "isolation" => "bubblewrap; no host checkout or HOME mount" }
 begin

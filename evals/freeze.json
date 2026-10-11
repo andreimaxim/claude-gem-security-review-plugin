@@ -30,7 +30,7 @@
   "evals/redis.Gemfile.lock": "b1a884f83207b4c4d94c98237920f957d864e48547010d6682ededd33027e214",
   "evals/redis_check.rb": "63be96ad1b5bec60723c07e4725fd92d56ceeb814ad24ea229a3c0e6304ed6f4",
   "evals/research_trace.rb": "64568b85fab4fa7fd60c010cb525c62fea0698c9dc9b63eee9f7592dbf243dce",
-  "evals/run.rb": "79eb0487196212b09773425beea1bf073347c266a7d4d9186804cc2049ff447b",
+  "evals/run.rb": "60a37ca7b3ad5c0c92fd51bf001909692fd6188dacfcde15140d1fa1527b7c5a",
   "evals/sandbox.rb": "e2d5e889b05672275c7830c2973211f49895482cb31a0f7a96aaa2bd21d34204",
   "evals/sdk-runner.mjs": "560f18c0b14ac98a0e09b845cdd564eeffeec93aa17f05eeda7ced785d47fb57",
   "evals/setup": "0bee99ea59905ab2be45c4ed065c5560b99d66946571a0f93a954b84a37a69b9",

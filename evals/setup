@@ -8,31 +8,13 @@ echo '== Preparing the additional application repository =='
 "$application/.agents/setup"
 
 echo '== System dependencies =='
-packages=(bubblewrap git)
-missing=()
-for package in "${packages[@]}"; do
-  dpkg-query -W -f='${Status}' "$package" 2>/dev/null | grep -q 'install ok installed' || missing+=("$package")
-done
-if ((${#missing[@]})); then
-  root=()
-  if [[ $(id -u) != 0 ]]; then root=(sudo -E); fi
-  "${root[@]}" apt-get update -qq
-  "${root[@]}" env DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommends "${missing[@]}"
-fi
+sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommends \
+  bubblewrap git
 
-echo '== Installing mise and Ruby =='
-if [[ ! -x "$HOME/.local/bin/mise" ]]; then
-  curl --fail --silent --show-error --location https://mise.run | sh
-fi
-export PATH="$HOME/.local/bin:$PATH"
+echo '== Trusting the evaluator toolchain =='
 mise trust "$PWD/mise.toml"
 mise install
-mise reshim
-export PATH="$HOME/.local/share/mise/shims:$PATH"
-activation='export PATH="$HOME/.local/share/mise/shims:$HOME/.local/bin:$PATH"'
-for profile in "$HOME/.bashrc" "$HOME/.bash_profile"; do
-  grep -Fqx "$activation" "$profile" 2>/dev/null || printf '\n%s\n' "$activation" >> "$profile"
-done
+eval "$(mise activate bash --shims)"
 
 echo '== Installing locked application dependencies =='
 export BUNDLE_FROZEN=true

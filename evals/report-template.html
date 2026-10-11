@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gem upgrade research · Individual report</title>
+<style>
+:root{--paper:#f5f4ef;--surface:#fffefa;--ink:#203536;--muted:#586b6b;--line:#d6ded8;--teal:#14685b;--bad:#bd594d;--incomplete:#7b8796;--soft:#e8eee7}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif;font-variant-numeric:tabular-nums}button,summary{font:inherit;color:inherit;cursor:pointer}a{color:var(--teal)}:focus-visible{outline:3px solid #c07821;outline-offset:4px}h1,h3,p{margin:0}h1{font:400 24px/1.2 Georgia,"Times New Roman",serif}h3{font-size:16px}small{font-size:12px}.muted{color:var(--muted)}
+.report{margin:28px auto 48px;border:1px solid var(--line);border-radius:12px;width:min(1030px,92vw);background:var(--surface)}.report-head{position:sticky;top:0;background:var(--surface);padding:20px 26px;border-bottom:1px solid var(--line);border-radius:12px 12px 0 0;z-index:1}.report-head p{font-size:12px;color:var(--muted);margin-top:5px}.report-body{padding:24px 26px}.report-meta{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;margin-bottom:14px}.report-meta span{background:var(--soft);padding:5px 9px;border-radius:4px}.execution-note{font-size:12px;color:var(--muted);margin-bottom:22px}.findings{margin:14px 0 24px;display:flex;flex-direction:column;gap:10px}.finding{border:1px solid var(--line);border-left:3px solid var(--incomplete);padding:14px 16px;font-size:13px;border-radius:4px}.finding.material{border-left-color:var(--bad)}.finding p{margin:8px 0}.finding blockquote{margin:12px 0;padding:8px 14px;border-left:2px solid var(--line);color:var(--muted);white-space:pre-wrap;overflow-wrap:anywhere}.finding .evidence{font-size:11px;color:var(--muted);overflow-wrap:anywhere}.finding .evidence a{color:inherit}.report-text{white-space:pre-wrap;overflow-wrap:anywhere;font:13px/1.75 ui-monospace,SFMono-Regular,Consolas,monospace;background:#f1f3ed;padding:20px;border-radius:6px;margin:12px 0 24px}.secondary{border-top:1px solid var(--line);padding-top:16px;font-size:12px;color:var(--muted)}.secondary p,.secondary ul{margin:12px 0}.secondary code{overflow-wrap:anywhere}.button{border:1px solid var(--ink);padding:9px 14px;border-radius:5px;background:var(--surface);font-size:12px}.download{margin-top:18px;display:flex;gap:12px;flex-wrap:wrap}
+@media(max-width:600px){.report{margin:12px auto 28px;width:calc(100% - 24px)}.report-head,.report-body{padding:16px}h1{font-size:21px}.report-meta{gap:8px}.report-text{font-size:11px;padding:12px}.finding{padding:12px}}
+.finding,.report-text,.secondary{scroll-margin-top:115px}
+@media print{.report{width:100%;margin:0;border:0}.report-head{position:static}.download{display:none}.secondary{display:block}}
+</style>
+</head>
+<body>
+<main class="report" aria-labelledby="report-title">
+  <header class="report-head"><h1 id="report-title"></h1><p id="report-subtitle"></p></header>
+  <div class="report-body">
+    <div class="report-meta" id="report-meta"></div>
+    <p class="execution-note" id="execution-note"></p>
+    <h3>Review findings</h3><div class="findings" id="findings"></div>
+    <h3>Original research report</h3><p class="muted"><small>Original output, unchanged. Text is shown verbatim, not executed or reinterpreted.</small></p>
+    <pre class="report-text" id="report-text"></pre>
+    <details class="secondary" id="evidence-details"><summary>Execution, runtime checks and evidence</summary>
+      <p id="execution-detail"></p><p id="runtime-detail"></p><ul id="limits"></ul>
+      <p id="provenance"></p>
+      <div class="download"><button class="button" id="download-json">Download report + findings (JSON)</button><button class="button" id="download-csv">Download metrics (CSV)</button></div>
+    </details>
+  </div>
+</main>
+<script type="application/json" id="report-data">__REPORT_DATA__</script>
+<script>
+'use strict';
+const data=JSON.parse(document.getElementById('report-data').textContent);
+const $=id=>document.getElementById(id);
+const verdicts={insufficient:'Insufficient',needs_correction:'Correction',needs_verification:'Verification',no_material_issue_found:'No material issue found'};
+document.title=`${data.request.gem} · ${data.run_id} · Gem upgrade research`;
+$('report-title').textContent=`${data.request.gem} · ${data.run_id}`;
+$('report-subtitle').textContent=`${data.request.currentVersion} → ${data.request.requestedVersion} · ${data.model_label} / ${data.metrics.effort.replace(/^./,c=>c.toUpperCase())} · ${verdicts[data.verdict]} · Scroll for the full report ↓`;
+const chips=[`$${data.metrics.recorded_session_cost_usd.toFixed(3)} session estimate`,`${data.metrics.worker_seconds.toFixed(1)}s worker`,`${data.metrics.worker_tool_calls} tool calls`,`${data.metrics.report_words} words`,'One smoke run · not a benchmark group'];
+for(const text of chips){const chip=document.createElement('span');chip.textContent=text;$('report-meta').append(chip)}
+$('execution-note').textContent='Worker completed and main returned the report verbatim. Original harness outcome: execution_failure; corrected offline correlation passed.';
+const topics={F1:'cache callers',F2:'exact-version evidence',F3:'hiredis option'};
+for(const finding of data.findings){
+  const box=document.createElement('article');box.className='finding '+finding.severity;box.id=finding.key.toLowerCase();
+  const title=document.createElement('strong');title.textContent=`${finding.severity.toUpperCase()} · ${topics[finding.key]||finding.category}`;box.append(title);
+  const explanation=document.createElement('p');explanation.textContent=finding.explanation;box.append(explanation);
+  const quote=document.createElement('blockquote');quote.textContent=finding.quote;box.append(quote);
+  const evidence=document.createElement('p');evidence.className='evidence';evidence.append('Evidence: ');
+  finding.sources.forEach((url,index)=>{if(index)evidence.append(' · ');const link=document.createElement('a');link.href=url;link.textContent=url;evidence.append(link)});
+  box.append(evidence);$('findings').append(box);
+}
+$('report-text').textContent=data.report;
+$('execution-detail').textContent=data.execution;
+$('runtime-detail').textContent='Rails corpus: 21 scored impacts and nine controls reproduced; reference repair passed 34 tests / 90 assertions at both seeds. Redis-only comparison: five tests / 20 assertions passed with matching app observations under both clients. These runtime checks are independent of the researcher’s report.';
+for(const text of data.limits){const item=document.createElement('li');item.textContent=text;$('limits').append(item)}
+$('provenance').textContent='Native main/subagent logs were recovered from the live worker filesystem before stopping the idle harness, not exported through a clean SDK shutdown. The raw trace, original report, request, manifest, trial freeze, runtime observations and checksums are retained beside this report. No second paid session was run.';
+function download(name,text,type){const url=URL.createObjectURL(new Blob([text],{type}));const link=document.createElement('a');link.href=url;link.download=name;link.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}
+$('download-json').onclick=()=>download('report-and-findings.json',JSON.stringify(data,null,2),'application/json');
+$('download-csv').onclick=()=>download('metrics.csv',data.metrics_csv,'text/csv');
+</script>
+</body>
+</html>

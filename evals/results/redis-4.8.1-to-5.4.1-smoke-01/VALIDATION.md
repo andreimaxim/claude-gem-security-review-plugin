@@ -1,8 +1,11 @@
 # Validation evidence
 
-The final app pin is recorded in `current-corpus-runtime-observations.json`.
-The paid trial's older pin remains in `manifest.json`; these are deliberately
-different snapshots, not interchangeable runs.
+Each runtime check records its app pin in its observations JSON. The paid
+trial's pin remains in `manifest.json`; these are different snapshots, not
+interchangeable runs. The current app pin simplifies orb setup/resume and their
+documentation; application code, dependencies and benchmark expectations are
+unchanged. Setup and resume passed with PostgreSQL accepting connections and
+Redis returning `PONG`. No new model session was run.
 
 ## Rails ground truth
 
@@ -55,12 +58,15 @@ is the corrected corpus-pin check. Neither is a positive-issue Redis rubric.
 
 ## Report rendering
 
-The self-contained HTML was rendered with agent-browser Chromium at 1280px and
-390px, both at 2× scale. Original-report disclosure and JSON/CSV download buttons
-were exercised. The original text matches the retained report; no external assets
-load and no document overflow occurs at either width. Default desktop, expanded
-original-report and narrow-layout screenshots were inspected and corrected.
-The narrow layout uses labelled runtime cards, not clipped table columns.
+The self-contained HTML uses the established individual-report detail layout:
+compact run metadata, severity-bordered review findings, literal quotations and
+evidence, followed by the complete original report shown directly. Execution
+diagnostics and runtime checks sit in secondary detail after the original text.
+It was rendered with agent-browser Chromium at 1280px and 390px, both at 2× scale.
+The evidence disclosure and JSON/CSV download buttons were exercised. The original
+text matches the retained report; no external assets load and no document overflow
+occurs at either width. Desktop, original-report and narrow-layout screenshots
+were inspected. No model session or grading change was involved in rendering.
 
 Code-review outcomes and their limits are in `REVIEWERS.md`. This evidence does
 not establish five-run benchmark repeatability or authenticated worker provenance.

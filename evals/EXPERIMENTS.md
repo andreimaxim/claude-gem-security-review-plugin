@@ -67,6 +67,8 @@ then evaluate the chosen candidate against them without further optimization.
 Once holdout results influence a prompt change, that set is development data;
 reserve another gem/application case for the next generalization check.
 
-The Rails runtime corpus is reproduced. The Redis holdout and paid research
-scores are not implemented or measured yet. Astra, Opus and Grok reviews of the
-code/evidence assess benchmark validity; they are not substitutes for model trials.
+Rails is the reproduced development corpus. Redis checks and one-time research
+smoke trials are exploratory until a positive-issue holdout rubric is frozen.
+See `results/` for recorded trials, original execution outcomes and reviews.
+Astra, Opus and Grok code/evidence reviews assess benchmark validity; they are
+not substitutes for five-run model/prompt benchmark groups.

@@ -1,0 +1,1 @@
+{"agentType":"gem-upgrade:researcher","pluginSteered":true,"description":"Research redis 4.8.1 → 5.4.1","toolUseId":"toolu_plugin_e8ad1c555ec94c75a71b994ed232e84d","spawnDepth":1,"requestShape":"background","requestNonInteractive":true}

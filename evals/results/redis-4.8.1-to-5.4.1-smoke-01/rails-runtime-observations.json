@@ -1,0 +1,204 @@
+{
+  "application": {
+    "repository": "https://github.com/andreimaxim/margin-notes",
+    "revision": "182ac788d97c26675dba5f8bd2b1b9dabb651baa",
+    "tree": "0338b6a069b50e62084d492b7e753e1f00400ffb"
+  },
+  "freeze_sha256": "460b28a9e7cd95a6c6d05c25b7bd10a9f462991d0938f28dae47d65f2a6465c7",
+  "rubric_version": 3,
+  "observations": {
+    "baseline": {
+      "timestamp_cast": "Time",
+      "local_cache": [
+        "old",
+        "old"
+      ],
+      "long_key": false,
+      "sse_batch": 3,
+      "stream_buffer": {
+        "return": "Array",
+        "body": "changed"
+      },
+      "parameter_encoding": {
+        "error": "ActionController::BadRequest"
+      },
+      "limit": "ActiveRecord::Relation",
+      "distinct_average": 2.3333333333333335,
+      "grouped_update": 3,
+      "bulk_deprecation": false,
+      "delete_multi": {
+        "error": "FrozenError"
+      },
+      "head_after_render": {
+        "status": 200,
+        "exception": null
+      },
+      "sql_boolean": [
+        "TRUE",
+        "FALSE"
+      ],
+      "nested_isolation": {
+        "error": "ActiveRecord::TransactionIsolationError"
+      },
+      "serializer_precedence": "legacy",
+      "duration_precision": 1.5,
+      "frozen_advance": {
+        "error": "FrozenError"
+      },
+      "indifferent_filter": null,
+      "blank_locale": "/locale//products/123",
+      "http_date": 200,
+      "nil_separator": {
+        "error": "TypeError"
+      },
+      "cache_format_control": 7.0,
+      "quoted_literal_control": "literal",
+      "strong_params_control": {
+        "title": "a"
+      },
+      "sse_control": "event: notes\nid: latest\ndata: {\"count\":1}\n\n",
+      "job_zone": "2019-12-31T15:00:00Z",
+      "json_escape_control": true,
+      "caption_alias": "Note: Example",
+      "legacy_label": "Margin Notes",
+      "global_timezone": "utc",
+      "global_warning": "CSV v1",
+      "nil_form": true,
+      "retry_wait": 1,
+      "exception_policy": {
+        "error": "ActiveRecord::RecordNotFound"
+      },
+      "runtime": {
+        "ruby": "3.2.9",
+        "gems": {
+          "rails": "7.0.8.7",
+          "puma": "5.6.9",
+          "rack": "2.2.24",
+          "pg": "1.5.9",
+          "redis": "4.8.1"
+        },
+        "postgresql_server": "15.19 (Debian 15.19-0+deb12u1)",
+        "redis_server": "7.0.15"
+      },
+      "puma_rack": "ready",
+      "enum_syntax": "ready",
+      "positional_coder": "ready",
+      "partial_writes": "ready",
+      "virtual_enum": "ready",
+      "method_alias": "ready"
+    },
+    "target": {
+      "puma_rack": {
+        "error": "StandardError"
+      },
+      "enum_syntax": {
+        "error": "ArgumentError"
+      },
+      "positional_coder": {
+        "error": "ArgumentError"
+      },
+      "partial_writes": {
+        "error": "NoMethodError"
+      },
+      "virtual_enum": {
+        "error": "RuntimeError"
+      },
+      "method_alias": {
+        "error": "ArgumentError"
+      },
+      "timestamp_cast": "Time",
+      "local_cache": [
+        "old",
+        "old"
+      ],
+      "long_key": true,
+      "sse_batch": 1,
+      "stream_buffer": {
+        "return": "Integer",
+        "body": "é",
+        "bytes": 2
+      },
+      "parameter_encoding": {
+        "error": "ActionController::BadRequest"
+      },
+      "limit": {
+        "error": "ArgumentError"
+      },
+      "distinct_average": 3.0,
+      "grouped_update": 1,
+      "bulk_deprecation": true,
+      "delete_multi": 1,
+      "head_after_render": {
+        "status": 500,
+        "exception": "AbstractController::DoubleRenderError"
+      },
+      "sql_boolean": [
+        "TRUE",
+        "FALSE"
+      ],
+      "nested_isolation": 3,
+      "serializer_precedence": "current",
+      "duration_precision": 1.5083333333333333,
+      "frozen_advance": "2020-01-02T12:00:00Z",
+      "indifferent_filter": "Ada",
+      "blank_locale": "/products/123",
+      "http_date": 304,
+      "nil_separator": "donaldeknuth",
+      "cache_format_control": 7.0,
+      "quoted_literal_control": "literal",
+      "strong_params_control": {
+        "title": "a"
+      },
+      "sse_control": "event: notes\nid: latest\ndata: {\"count\":1}\n\n",
+      "job_zone": "2020-01-01T00:00:00+09:00",
+      "json_escape_control": true,
+      "caption_alias": "Example",
+      "legacy_label": {
+        "error": "NoMethodError"
+      },
+      "global_timezone": {
+        "error": "NoMethodError"
+      },
+      "global_warning": {
+        "error": "NoMethodError"
+      },
+      "nil_form": {
+        "error": "ArgumentError"
+      },
+      "retry_wait": {
+        "error": "RuntimeError"
+      },
+      "exception_policy": 404,
+      "runtime": {
+        "ruby": "3.2.9",
+        "gems": {
+          "rails": "8.1.4",
+          "puma": "6.6.1",
+          "rack": "3.2.7",
+          "pg": "1.5.9",
+          "redis": "4.8.1"
+        },
+        "postgresql_server": "15.19 (Debian 15.19-0+deb12u1)",
+        "redis_server": "7.0.15"
+      }
+    }
+  },
+  "repaired_tests": [
+    {
+      "runs": 34,
+      "assertions": 90,
+      "failures": 0,
+      "errors": 0,
+      "skips": 0,
+      "seed": 12345
+    },
+    {
+      "runs": 34,
+      "assertions": 90,
+      "failures": 0,
+      "errors": 0,
+      "skips": 0,
+      "seed": 67890
+    }
+  ]
+}

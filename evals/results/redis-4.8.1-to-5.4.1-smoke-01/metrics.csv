@@ -1,0 +1,2 @@
+model,effort,reports,worker_seconds,recorded_session_cost_usd,worker_tool_calls,session_unique_tool_calls,worker_total_tokens,report_words,runner_seconds
+claude-opus-5-5,low,1,28.382,0.21186960000000002,4,"{""ToolSearch"":1,""mcp__gem-upgrade__research"":1,""Grep"":2,""Read"":1,""WebSearch"":1}",10037,415,247.55269047600086

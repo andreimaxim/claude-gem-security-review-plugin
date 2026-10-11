@@ -151,6 +151,9 @@ worker ID. It requires the exact ID-bearing completion payload in a successful
 conflicting run ID is rejected. This verifies functional report delivery, not
 authenticated producer provenance. It retains raw traces, request, manifest,
 native main/subagent JSONL transcripts, stderr, timing and handoff state.
+The fresh `sessions/` output directory is mounted as the worker's native log
+directory, so files already written remain available on timeout or termination;
+failed sessions can contain partial logs. No other evaluator output is mounted.
 Summarization deduplicates tool
 IDs and uses the final usage record rather than summing streaming messages.
 Unresolved model/effort is flagged. Cost fields are estimates, not invoices.

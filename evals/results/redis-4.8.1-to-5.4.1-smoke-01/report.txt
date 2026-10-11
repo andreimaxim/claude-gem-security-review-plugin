@@ -1,0 +1,26 @@
+Upgrading the `redis` gem from 4.8.1 to 5.4.1 looks low-risk for this app. The installed Rails (7.0.8.7) already supports redis-rb 5, and the only place the app touches Redis is the Rails cache store setting. I did not change anything, and I did not install the new version or run the tests.
+
+**How the app uses Redis**
+- `/app/Gemfile` line 6 pins `gem "redis", "4.8.1"`. `/app/Gemfile.lock` resolves `redis (4.8.1)` next to `rails` and `activesupport` 7.0.8.7.
+- `/app/config/application.rb` lines 17-19 set `config.cache_store = :redis_cache_store` with only `url:` (from `REDIS_URL`) and `namespace:`.
+- No app code calls the Redis client directly. A search for "redis" found nothing in `app/`, `lib/` or the tests: no `Redis.new`, no `Redis.current`, no hiredis driver, no `redis_cache_store` options beyond the two above. The other hits are docs, setup scripts and a comment in `config/environments/development.rb`.
+
+**Does Rails 7.0.8.7 work with redis 5?**
+- Yes. Rails 7.0.4 (September 2022) made `RedisCacheStore` and the Action Cable Redis adapter work with redis-rb 5.0, as a backport to the 7.0 branch. 7.0.8.7 includes that change.
+- Keeping `config.load_defaults 7.0` doesn't matter here. Which redis versions work depends on the installed Rails version, not on the framework defaults setting.
+
+**What changes in redis 5.x (summary from memory, not checked against the redis-rb changelog)**
+- redis-rb 5 is rebuilt on top of the `redis-client` gem, so Bundler will add `redis-client` to `Gemfile.lock`. 5.4.x needs a fairly recent `redis-client`.
+- Removed in 5: `Redis.current`, the old `driver: :hiredis` option (replaced by the separate `hiredis-client` gem), and some loosely typed command arguments. The app uses none of these.
+- Ruby 3.2.9 (from `.ruby-version`) is well within what 5.x supports.
+
+**Remaining risks and checks**
+- Cache error handling: Rails 7.0.x's handling of Redis errors in the cache store has had small fixes since then (for example a `supports_expire_nx?` bug with distributed Redis). These shouldn't affect this app's simple single-URL setup.
+- To upgrade: change the Gemfile pin to `"5.4.1"`, run `bundle update redis`, check that `redis-client` was added to the lockfile, and run `bin/rails test` with Redis running. Exercising cache reads and writes on the export endpoint would be a useful extra check.
+
+Sources (mostly mirrors and bot pull requests quoting the Rails changelog; the official rails/rails CHANGELOG is worth checking before relying on them):
+- [Rails 7.0.4 release notes (newreleases.io)](https://newreleases.io/project/gems/rails/release/7.0.4)
+- [rubygem-activesupport-7.0 revisions, changelog excerpt (openSUSE)](https://build-test-1.opensuse.org/package/revisions/devel:ARM:Factory:Contrib:ILP32/rubygem-activesupport-7.0)
+- [Bump activesupport 7.0.3.1 to 7.0.4.1 PR, changelog quote](https://github.com/olivere/atom_feed/pull/6/{{ revealButtonHref }})
+- [OBS request with activesupport changelog](https://build.openbuildservice.org/request/show/1010047)
+- [Rails activesupport mirror with commit history (demo.gitea.com)](https://demo.gitea.com/TEST_CODEOWNERS/rails/src/commit/92dcc9a09fb9c23e5ee3d35687bc48ee2bc062b4/activesupport)

@@ -1,12 +1,14 @@
-# Linux read-only filesystem boundary shared by the runner and leakage checks.
+# Linux read-only application/plugin mounts for the SDK runner.
 # The evaluator repository, host HOME, /tmp and process namespace are NOT mounted.
 module WorkerSandbox
-  def self.command(app:, plugin:, runtime:, arguments:)
+  def self.command(app:, plugin:, runtime:, sessions:, arguments:)
     command = ["bwrap", "--unshare-all", "--share-net", "--die-with-parent", "--new-session"]
     %w[/usr /lib /lib64].each { |path| command += ["--ro-bind", path, path] if File.directory?(path) }
     command += ["--symlink", "usr/bin", "/bin", "--symlink", "usr/sbin", "/sbin",
                 "--proc", "/proc", "--dev", "/dev", "--tmpfs", "/tmp",
                 "--dir", "/home", "--dir", "/home/worker", "--dir", "/etc",
+                "--dir", "/home/worker/.claude",
+                "--bind", sessions, "/home/worker/.claude/projects",
                 "--ro-bind", "/etc/ssl/certs", "/etc/ssl/certs",
                 "--ro-bind", "/etc/resolv.conf", "/etc/resolv.conf",
                 "--ro-bind", app, "/app", "--ro-bind", plugin, "/plugin",

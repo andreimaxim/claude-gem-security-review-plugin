@@ -1,0 +1,178 @@
+{
+  "schema_version": 2,
+  "status": "complete",
+  "positive_issues": 21,
+  "requested_positive_issues": 21,
+  "nonissue_controls": 9,
+  "application_source": {
+    "repository": "https://github.com/andreimaxim/margin-notes",
+    "revision": "182ac788d97c26675dba5f8bd2b1b9dabb651baa",
+    "tree": "0338b6a069b50e62084d492b7e753e1f00400ffb"
+  },
+  "application_files": [
+    ".agents/resume",
+    ".agents/services",
+    ".agents/setup",
+    ".claude/skills/writing-rails-controllers/SKILL.md",
+    ".claude/skills/writing-rails-models/SKILL.md",
+    ".claude/skills/writing-rails-views/SKILL.md",
+    ".gitignore",
+    ".ruby-version",
+    "CLAUDE.md",
+    "Gemfile",
+    "Gemfile.lock",
+    "README.md",
+    "Rakefile",
+    "TESTING.md",
+    "app/controllers/application_controller.rb",
+    "app/controllers/concerns/.keep",
+    "app/controllers/exports_controller.rb",
+    "app/controllers/notes_controller.rb",
+    "app/controllers/streams_controller.rb",
+    "app/jobs/application_job.rb",
+    "app/jobs/export_destination.rb",
+    "app/jobs/export_job.rb",
+    "app/models/application_record.rb",
+    "app/models/concerns/.keep",
+    "app/models/note.rb",
+    "app/services/export_preferences.rb",
+    "app/services/notebook_workflows.rb",
+    "app/views/notes/index.json.jbuilder",
+    "bin/rails",
+    "bin/rake",
+    "bin/setup",
+    "config.ru",
+    "config/application.rb",
+    "config/boot.rb",
+    "config/credentials.yml.enc",
+    "config/database.yml",
+    "config/environment.rb",
+    "config/environments/development.rb",
+    "config/environments/production.rb",
+    "config/environments/test.rb",
+    "config/initializers/cors.rb",
+    "config/initializers/destination_serializers.rb",
+    "config/initializers/filter_parameter_logging.rb",
+    "config/initializers/inflections.rb",
+    "config/locales/en.yml",
+    "config/puma.rb",
+    "config/routes.rb",
+    "config/secrets.yml",
+    "db/migrate/20200101000000_create_notes.rb",
+    "db/schema.rb",
+    "db/seeds.rb",
+    "docs/guides/controllers.md",
+    "docs/guides/fixtures.md",
+    "docs/guides/models.md",
+    "docs/guides/views.md",
+    "lib/tasks/.keep",
+    "log/.keep",
+    "mise.toml",
+    "public/robots.txt",
+    "test/controllers/.keep",
+    "test/controllers/exports_controller_test.rb",
+    "test/controllers/notes_controller_test.rb",
+    "test/fixtures/files/.keep",
+    "test/fixtures/notes.yml",
+    "test/integration/.keep",
+    "test/models/.keep",
+    "test/models/note_test.rb",
+    "test/test_helper.rb",
+    "tmp/.keep",
+    "tmp/pids/.keep",
+    "vendor/.keep"
+  ],
+  "application_sha256": "ab8dce5151c23629d8c66f315cc2b19fb99479a14ddc87f0b2a92f0a95098bf1",
+  "freeze_sha256": "460b28a9e7cd95a6c6d05c25b7bd10a9f462991d0938f28dae47d65f2a6465c7",
+  "plugin_files": {
+    ".claude-plugin/plugin.json": "38f5264123a193de1fe5d2ea80006d3c75083a307d99505a83f8c712734dbce0",
+    "README.md": "e9eb35a1b6c7a6c17f44e24ed44730701b4a236a177680bfdd557cd954674ffd",
+    "hooks/hooks.json": "b3c89d252cb71dc6fc852ac50b531a4068b17bf3e4ca2e0744ef37789322110b",
+    "hooks/register.test.ts": "dd1c0e7de0323693f470c84308ba3552ebf2c75aa1375a96338b28ace8faeaa7",
+    "hooks/register.ts": "4ddcaeb846b9b1a2e5040a9178cf9ac6096fb71d3edb13a2b0d1729ac6d9530c",
+    "prompts/research.md": "c197b8f3b5f839838d80c2aa1d458c72756cba82fa59426ae96b8ec5f7892269",
+    "tsconfig.json": "4087cf0ba92fde503ed0e7c56f37bcb26ad0c085873f10219d0336c0f19b5a8f"
+  },
+  "cases": [
+    {
+      "id": "rails",
+      "request": {
+        "gem": "rails",
+        "currentVersion": "7.0.8.7",
+        "requestedVersion": "8.1.4"
+      },
+      "control": false,
+      "rubric_version": 3
+    },
+    {
+      "id": "actionpack",
+      "request": {
+        "gem": "actionpack",
+        "currentVersion": "7.0.8.7",
+        "requestedVersion": "8.1.4"
+      },
+      "control": false,
+      "rubric_version": 3
+    },
+    {
+      "id": "actionview",
+      "request": {
+        "gem": "actionview",
+        "currentVersion": "7.0.8.7",
+        "requestedVersion": "8.1.4"
+      },
+      "control": false,
+      "rubric_version": 3
+    },
+    {
+      "id": "activejob",
+      "request": {
+        "gem": "activejob",
+        "currentVersion": "7.0.8.7",
+        "requestedVersion": "8.1.4"
+      },
+      "control": false,
+      "rubric_version": 3
+    },
+    {
+      "id": "activerecord",
+      "request": {
+        "gem": "activerecord",
+        "currentVersion": "7.0.8.7",
+        "requestedVersion": "8.1.4"
+      },
+      "control": false,
+      "rubric_version": 3
+    },
+    {
+      "id": "activesupport",
+      "request": {
+        "gem": "activesupport",
+        "currentVersion": "7.0.8.7",
+        "requestedVersion": "8.1.4"
+      },
+      "control": false,
+      "rubric_version": 3
+    },
+    {
+      "id": "jbuilder-same-version",
+      "request": {
+        "gem": "jbuilder",
+        "currentVersion": "2.13.0",
+        "requestedVersion": "2.13.0"
+      },
+      "control": true,
+      "rubric_version": 3
+    },
+    {
+      "id": "redis",
+      "request": {
+        "gem": "redis",
+        "currentVersion": "4.8.1",
+        "requestedVersion": "5.4.1"
+      },
+      "control": false,
+      "rubric_version": null
+    }
+  ]
+}

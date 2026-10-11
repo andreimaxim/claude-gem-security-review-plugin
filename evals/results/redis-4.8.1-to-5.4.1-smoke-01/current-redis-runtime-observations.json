@@ -1,0 +1,175 @@
+{
+  "application": {
+    "repository": "https://github.com/andreimaxim/margin-notes",
+    "revision": "5a17e59a9cd81fe0598fd668e6a690810deaf49d",
+    "tree": "13f14f2e1aca9a607fb6ccc5442353f5d5dbe32a"
+  },
+  "stacks": {
+    "baseline": {
+      "observations": {
+        "timestamp_cast": "Time",
+        "local_cache": [
+          "old",
+          "old"
+        ],
+        "long_key": false,
+        "sse_batch": 3,
+        "stream_buffer": {
+          "return": "Array",
+          "body": "changed"
+        },
+        "parameter_encoding": {
+          "error": "ActionController::BadRequest"
+        },
+        "limit": "ActiveRecord::Relation",
+        "distinct_average": 2.3333333333333335,
+        "grouped_update": 3,
+        "bulk_deprecation": false,
+        "delete_multi": {
+          "error": "FrozenError"
+        },
+        "head_after_render": {
+          "status": 200,
+          "exception": null
+        },
+        "sql_boolean": [
+          "TRUE",
+          "FALSE"
+        ],
+        "nested_isolation": {
+          "error": "ActiveRecord::TransactionIsolationError"
+        },
+        "serializer_precedence": "legacy",
+        "duration_precision": 1.5,
+        "frozen_advance": {
+          "error": "FrozenError"
+        },
+        "indifferent_filter": null,
+        "blank_locale": "/locale//products/123",
+        "http_date": 200,
+        "nil_separator": {
+          "error": "TypeError"
+        },
+        "cache_format_control": 7.0,
+        "quoted_literal_control": "literal",
+        "strong_params_control": {
+          "title": "a"
+        },
+        "sse_control": "event: notes\nid: latest\ndata: {\"count\":1}\n\n",
+        "job_zone": "2019-12-31T15:00:00Z",
+        "json_escape_control": true,
+        "caption_alias": "Note: Example",
+        "legacy_label": "Margin Notes",
+        "global_timezone": "utc",
+        "global_warning": "CSV v1",
+        "nil_form": true,
+        "retry_wait": true,
+        "exception_policy": {
+          "error": "ActiveRecord::RecordNotFound"
+        },
+        "runtime": {
+          "ruby": "3.2.9",
+          "gems": {
+            "rails": "7.0.8.7",
+            "puma": "5.6.9",
+            "rack": "2.2.24",
+            "pg": "1.5.9",
+            "redis": "4.8.1"
+          },
+          "postgresql_server": "15.19 (Debian 15.19-0+deb12u1)",
+          "redis_server": "7.0.15"
+        }
+      },
+      "tests": {
+        "runs": 5,
+        "assertions": 20,
+        "failures": 0,
+        "errors": 0,
+        "skips": 0
+      }
+    },
+    "target": {
+      "observations": {
+        "timestamp_cast": "Time",
+        "local_cache": [
+          "old",
+          "old"
+        ],
+        "long_key": false,
+        "sse_batch": 3,
+        "stream_buffer": {
+          "return": "Array",
+          "body": "changed"
+        },
+        "parameter_encoding": {
+          "error": "ActionController::BadRequest"
+        },
+        "limit": "ActiveRecord::Relation",
+        "distinct_average": 2.3333333333333335,
+        "grouped_update": 3,
+        "bulk_deprecation": false,
+        "delete_multi": {
+          "error": "FrozenError"
+        },
+        "head_after_render": {
+          "status": 200,
+          "exception": null
+        },
+        "sql_boolean": [
+          "TRUE",
+          "FALSE"
+        ],
+        "nested_isolation": {
+          "error": "ActiveRecord::TransactionIsolationError"
+        },
+        "serializer_precedence": "legacy",
+        "duration_precision": 1.5,
+        "frozen_advance": {
+          "error": "FrozenError"
+        },
+        "indifferent_filter": null,
+        "blank_locale": "/locale//products/123",
+        "http_date": 200,
+        "nil_separator": {
+          "error": "TypeError"
+        },
+        "cache_format_control": 7.0,
+        "quoted_literal_control": "literal",
+        "strong_params_control": {
+          "title": "a"
+        },
+        "sse_control": "event: notes\nid: latest\ndata: {\"count\":1}\n\n",
+        "job_zone": "2019-12-31T15:00:00Z",
+        "json_escape_control": true,
+        "caption_alias": "Note: Example",
+        "legacy_label": "Margin Notes",
+        "global_timezone": "utc",
+        "global_warning": "CSV v1",
+        "nil_form": true,
+        "retry_wait": true,
+        "exception_policy": {
+          "error": "ActiveRecord::RecordNotFound"
+        },
+        "runtime": {
+          "ruby": "3.2.9",
+          "gems": {
+            "rails": "7.0.8.7",
+            "puma": "5.6.9",
+            "rack": "2.2.24",
+            "pg": "1.5.9",
+            "redis": "5.4.1"
+          },
+          "postgresql_server": "15.19 (Debian 15.19-0+deb12u1)",
+          "redis_server": "7.0.15"
+        }
+      },
+      "tests": {
+        "runs": 5,
+        "assertions": 20,
+        "failures": 0,
+        "errors": 0,
+        "skips": 0
+      }
+    }
+  }
+}

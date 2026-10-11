@@ -1,0 +1,10 @@
+{
+  "id": "redis",
+  "request": {
+    "gem": "redis",
+    "currentVersion": "4.8.1",
+    "requestedVersion": "5.4.1"
+  },
+  "control": false,
+  "rubric_version": null
+}

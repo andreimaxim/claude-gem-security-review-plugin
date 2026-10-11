@@ -1,0 +1,14 @@
+{
+  "started_at": "2026-10-11T00:04:29Z",
+  "command": [
+    "/usr/bin/node",
+    "/opt/claude/sdk-runner.mjs"
+  ],
+  "status": "execution_failure",
+  "isolation": "bubblewrap; no host checkout or HOME mount",
+  "exit_code": 1,
+  "worker_id": null,
+  "worker_completed": false,
+  "main_handoff": false,
+  "duration_seconds": 0.013642202999108122
+}

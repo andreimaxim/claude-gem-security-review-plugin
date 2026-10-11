@@ -45,6 +45,8 @@ end
 output = File.join(File.realpath(parent), *suffix)
 abort "Output must be outside worker mounts" if [plugin, runtime].any? { |path| output == path || output.start_with?(path + "/") }
 FileUtils.mkdir_p(output)
+sessions = File.join(output, "sessions")
+FileUtils.mkdir_p(sessions)
 File.write(File.join(output, "request.json"), JSON.pretty_generate(item) + "\n")
 FileUtils.cp(File.join(package, "manifest.json"), File.join(output, "manifest.json"))
 command = ["/usr/bin/env", "node", "/opt/claude/sdk-runner.mjs"]
@@ -53,7 +55,7 @@ state = { "started_at" => Time.now.utc.iso8601, "command" => command, "status" =
 begin
   Dir.mktmpdir("notebook-worker-") do |app|
     abort "Extraction failed" unless system("tar", "-xf", snapshot, "-C", app)
-    isolated = WorkerSandbox.command(app: app, plugin: plugin, runtime: runtime, arguments: command)
+    isolated = WorkerSandbox.command(app: app, plugin: plugin, runtime: runtime, sessions: sessions, arguments: command)
     File.open(File.join(output, "trace.jsonl"), "wx") do |trace|
       File.open(File.join(output, "stderr.log"), "wx") do |errors|
         Open3.popen3(WorkerSandbox.environment, *isolated, unsetenv_others: true, pgroup: true) do |input, stream, error_stream, wait|

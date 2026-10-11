@@ -1,0 +1,73 @@
+{
+  "verdict": "insufficient",
+  "report_sha256": "f3a6f2b51de0899284a1708c777735c0e892a33df4384743d5e15608e7ae9a56",
+  "method": "Evaluator review of literal report claims against pinned app, exact tagged source, retained tool trace, and baseline/target observations. Not a blinded independent human review or a Rails rubric score.",
+  "coverage": {
+    "manifest": "correct",
+    "application": "partial",
+    "framework_coupling": "correct",
+    "exact_target_delta": "missing"
+  },
+  "metrics": {
+    "model": "claude-opus-5-5",
+    "effort": "low",
+    "reports": 1,
+    "worker_seconds": 28.382,
+    "recorded_session_cost_usd": 0.21186960000000002,
+    "worker_tool_calls": 4,
+    "session_unique_tool_calls": {
+      "ToolSearch": 1,
+      "mcp__gem-upgrade__research": 1,
+      "Grep": 2,
+      "Read": 1,
+      "WebSearch": 1
+    },
+    "worker_total_tokens": 10037,
+    "report_words": 415,
+    "runner_seconds": 247.55269047600086
+  },
+  "findings": [
+    {
+      "key": "F1",
+      "category": "material_omission",
+      "severity": "material",
+      "quote": "the only place the app touches Redis is the Rails cache store setting",
+      "explanation": "The report correctly finds no direct Redis client use, but does not trace the actual Rails.cache callers. Exports read/write snapshots and delete matching keys; cache-status reads around a write in another thread. Grepping for redis alone misses these workflows. Baseline and target runtime checks independently exercised them and found no Redis-only difference.",
+      "sources": [
+        "https://github.com/andreimaxim/margin-notes/blob/182ac788d97c26675dba5f8bd2b1b9dabb651baa/app/controllers/exports_controller.rb",
+        "https://github.com/andreimaxim/margin-notes/blob/182ac788d97c26675dba5f8bd2b1b9dabb651baa/app/controllers/notes_controller.rb",
+        "https://github.com/andreimaxim/margin-notes/blob/182ac788d97c26675dba5f8bd2b1b9dabb651baa/app/services/notebook_workflows.rb",
+        "https://github.com/rails/rails/blob/v7.0.8.7/activesupport/lib/active_support/cache/redis_cache_store.rb"
+      ]
+    },
+    {
+      "key": "F2",
+      "category": "material_omission",
+      "severity": "material",
+      "quote": "What changes in redis 5.x (summary from memory, not checked against the redis-rb changelog)",
+      "explanation": "The uncertainty is honestly labelled, not a false claim. However, this source-backed upgrade task needs exact target evidence. The worker used one web search, no web fetch, and no exact Redis source read. Its sources are mirrors and bot PRs; one citation contains an unresolved template token. The evaluator verified the gemspec's Ruby >= 2.6.0 and redis-client >= 0.22.0 requirements separately.",
+      "sources": [
+        "https://github.com/redis/redis-rb/blob/v5.4.1/redis.gemspec",
+        "https://github.com/redis/redis-rb/blob/v5.4.1/lib/redis.rb"
+      ]
+    },
+    {
+      "key": "F3",
+      "category": "minor_inaccuracy",
+      "severity": "minor",
+      "quote": "Removed in 5: `Redis.current`, the old `driver: :hiredis` option (replaced by the separate `hiredis-client` gem)",
+      "explanation": "Redis.current is removed, but the target still documents a driver option supporting :ruby and :hiredis. Changing the hiredis implementation/package is not the same as removing that option. This app selects neither hiredis nor Redis.current, so the imprecision does not prescribe an app repair.",
+      "sources": [
+        "https://github.com/redis/redis-rb/blob/v5.4.1/lib/redis.rb",
+        "https://github.com/redis/redis-rb/blob/v4.8.1/lib/redis.rb"
+      ]
+    }
+  ],
+  "execution": "Original harness execution_failure preserved. Worker completed and main delivered the exact payload; corrected matcher confirms content correlation offline. No clean shutdown rerun was performed.",
+  "limits": [
+    "One smoke trial, not a five-run benchmark group; no variation or accuracy percentage.",
+    "No frozen Redis positive-issue rubric; current app uses Rails.cache rather than distinct Redis command migrations.",
+    "Passing smoke tests do not establish production safety, performance, failover or every cache operation.",
+    "The trial pins app 182ac78; current corpus uses 5a17e59 after independently reviewed queue corrections. Original manifest and freeze remain unchanged."
+  ]
+}

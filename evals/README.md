@@ -165,6 +165,17 @@ summary, stderr and independent review. Scan for credentials before publication.
 Record hashes and label any redactions. One-time smoke checks are not five-run
 benchmark groups and cannot establish run-to-run variation.
 
+Render the recorded Redis smoke report from `evals/`:
+
+```sh
+ruby render_report.rb results/redis-4.8.1-to-5.4.1-smoke-01
+```
+
+The self-contained experiment overview includes cost, worker time, the review
+outcome and a clickable report tile. It verifies the original report hash and
+literal finding quotations without running a model. A single run has no
+repeatability estimate or meaningful percentile range.
+
 ## Grade independently
 
 Give a reviewer the report, rubric and tagged evidence, without model, effort,

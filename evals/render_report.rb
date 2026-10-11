@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-# Render a recorded individual report in the comparison template's detail style.
+# Render an experiment overview with the recorded report available in detail.
 require "json"
 require "digest"
 
@@ -17,8 +17,9 @@ model_label = review.fetch("metrics").fetch("model").sub(/\Aclaude-(opus|sonnet|
 end
 data = review.merge("request" => request, "report" => report,
   "run_id" => File.basename(directory).split("-").last(2).join("-"),
-  "model_label" => model_label, "metrics_csv" => File.read(File.join(directory, "metrics.csv")))
+  "model_label" => model_label, "metrics_csv" => File.read(File.join(directory, "metrics.csv")),
+  "started_at" => JSON.parse(File.read(File.join(directory, "execution.json"))).fetch("started_at"))
 template = File.read(File.join(__dir__, "report-template.html"))
 html = template.sub("__REPORT_DATA__") { JSON.generate(data).gsub("<", "\\u003c") }
 File.write(File.join(directory, "redis-smoke.html"), html)
-puts "Rendered individual report with verified original text and literal findings; no model session."
+puts "Rendered experiment overview and report detail with verified original text; no model session."

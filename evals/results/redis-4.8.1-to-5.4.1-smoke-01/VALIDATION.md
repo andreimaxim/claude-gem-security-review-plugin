@@ -58,15 +58,19 @@ is the corrected corpus-pin check. Neither is a positive-issue Redis rubric.
 
 ## Report rendering
 
-The self-contained HTML uses the established individual-report detail layout:
-compact run metadata, severity-bordered review findings, literal quotations and
-evidence, followed by the complete original report shown directly. Execution
-diagnostics and runtime checks sit in secondary detail after the original text.
-It was rendered with agent-browser Chromium at 1280px and 390px, both at 2× scale.
-The evidence disclosure and JSON/CSV download buttons were exercised. The original
-text matches the retained report; no external assets load and no document overflow
-occurs at either width. Desktop, original-report and narrow-layout screenshots
-were inspected. No model session or grading change was involved in rendering.
+The self-contained HTML follows the comparison-report overview: serif headline,
+study size, scope, configuration outcome/cost/time, an observed-point chart,
+repeatability limits, a clickable run tile, report length and methodology.
+The tile opens a report-detail dialog with literal review findings, evidence and
+the complete unchanged original. One report has no percentile distribution or
+repeatability estimate; those are explicitly unmeasured, not reported as zero.
+It was rendered with agent-browser Chromium at 1440px and 390px, both at 2× scale.
+The report tile, Close, Escape, methodology disclosure and JSON/CSV download
+buttons were exercised. DOM checks confirm the displayed original matches the
+retained 415-word report, three findings, one run tile, the insufficient verdict,
+$0.21 recorded cost and 28.4s worker time. No external assets load or horizontal
+overflow occurs. Desktop, narrow and open-dialog screenshots were inspected.
+No model session or grading change was involved in rendering.
 
 Code-review outcomes and their limits are in `REVIEWERS.md`. This evidence does
 not establish five-run benchmark repeatability or authenticated worker provenance.

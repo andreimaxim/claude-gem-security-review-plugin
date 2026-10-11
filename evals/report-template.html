@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Gem upgrade research · Individual report</title>
+<title>Gem upgrade research · Cost, time &amp; quality</title>
 <style>
 :root{--paper:#f5f4ef;--surface:#fffefa;--ink:#203536;--muted:#586b6b;--line:#d6ded8;--teal:#14685b;--bad:#bd594d;--incomplete:#7b8796;--soft:#e8eee7}
 *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif;font-variant-numeric:tabular-nums}button,summary{font:inherit;color:inherit;cursor:pointer}a{color:var(--teal)}:focus-visible{outline:3px solid #c07821;outline-offset:4px}h1,h3,p{margin:0}h1{font:400 24px/1.2 Georgia,"Times New Roman",serif}h3{font-size:16px}small{font-size:12px}.muted{color:var(--muted)}
@@ -12,10 +12,56 @@
 .finding,.report-text,.secondary{scroll-margin-top:115px}
 @media print{.report{width:100%;margin:0;border:0}.report-head{position:static}.download{display:none}.secondary{display:block}}
 </style>
+<style>
+/* Experiment overview: palette, typography and hierarchy of the comparison report. */
+.chart-figure{margin:0}
+.wrap{max-width:1272px;margin:auto;padding:28px 44px 60px}h2{font:400 30px/1.2 Georgia,"Times New Roman",serif;letter-spacing:-.025em;margin:0}.caps{font-size:11px;text-transform:uppercase;letter-spacing:.12em;font-weight:650}.topline{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--ink);padding-bottom:16px;gap:18px}.brand{display:flex;align-items:center;gap:9px;font-weight:650;font-size:13px}.mark{width:20px;height:20px;background:var(--teal);transform:rotate(45deg);border:5px solid var(--soft)}
+.hero{display:flex;justify-content:space-between;gap:32px;padding:44px 0 34px}.hero .caps{color:var(--teal);margin-bottom:16px}.hero h1{font-size:clamp(42px,5.6vw,74px);line-height:1.05;letter-spacing:-.045em;max-width:750px}.lede{max-width:610px;margin-top:20px;color:var(--muted);font-size:16px}.study{flex:0 0 204px;align-self:flex-end;padding-left:24px;border-left:1px solid var(--line)}.study strong{display:block;font-size:38px;line-height:1.2;font-weight:500}.study p{font-size:13px;color:var(--muted);margin:6px 0 15px}.study a{font-size:12px}
+.toolbar{display:flex;justify-content:space-between;gap:22px;background:var(--surface);padding:19px 22px;border:1px solid var(--line);border-radius:9px;margin:0}.toolbar dt{font-size:11px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;font-weight:650}.toolbar dd{margin:0;font-size:13px}.scope-note{margin:12px 2px 26px;font-size:13px;color:var(--muted)}.notice{padding:13px 17px;background:#f0eadb;border-left:3px solid #bc8b31;font-size:13px;margin-bottom:25px}.section-head{display:flex;align-items:baseline;justify-content:space-between;gap:16px;margin:28px 0 15px}.section-head p{color:var(--muted);font-size:13px;max-width:620px}.legend{display:flex;flex-wrap:wrap;gap:7px 20px;margin-bottom:16px;font-size:12px;color:var(--muted)}.swatch{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:6px}
+.panel{border:1px solid var(--line);border-radius:9px;background:var(--surface);overflow:hidden}.comparison{width:100%;border-collapse:collapse;table-layout:fixed}.comparison th{text-align:left;font-size:11px;color:var(--muted);padding:15px 20px;background:#eff2ec;border-bottom:1px solid var(--line)}.comparison td{padding:19px 20px;vertical-align:middle}.comparison th:first-child{width:23%}.comparison th:nth-child(2){width:31%}.model-name{font-size:15px;font-weight:650}.model-setting{font-size:12px;color:var(--muted);margin:3px 0}.n-label,.outcomes{font-size:11px;color:var(--muted)}.quality-number{font-size:22px;font-weight:550;line-height:1.2}.stack{height:12px;border-radius:3px;margin:8px 0 6px;background:var(--incomplete)}.metric{font-size:23px;font-weight:500;line-height:1.2}.metric small{font-size:12px;color:var(--muted)}.table-note{font-size:12px;color:var(--muted);padding:13px 20px;border-top:1px solid var(--line);background:#f7f8f3}
+.chart-layout{display:grid;grid-template-columns:1.35fr 1fr;gap:22px;margin:28px 0}.chart-card{padding:23px}.chart-card h2{font-size:24px}.chart-card p{font-size:12px;color:var(--muted);margin:7px 0 14px}.scatter{width:100%;display:block}.scatter text{font-size:11px;fill:var(--muted)}.unmeasured{margin:32px 0;font:400 28px Georgia,serif}.variation-explainer{border-top:1px solid var(--line);padding-top:13px}
+.matrix{width:100%;border-collapse:collapse}.matrix th{text-align:left;padding:13px 16px;font-size:11px;background:#eff2ec;color:var(--muted);border-bottom:1px solid var(--line)}.matrix th:first-child{width:25%}.matrix td{padding:15px 16px}.gem{font:12px ui-monospace,SFMono-Regular,Consolas,monospace}.run{border:0;border-radius:3px;width:32px;height:27px;padding:0;font-size:11px;color:white;background:var(--incomplete);margin-right:12px}.run:hover{transform:translateY(-3px)}.word-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;margin:16px 0 32px}.word-card{padding:16px 18px}.word-card h3{font-size:13px;margin-bottom:9px}.word-card p{font-size:11px;color:var(--muted);margin-top:10px}
+.methods{border-top:1px solid var(--ink);padding-top:22px;margin-top:32px}.methods>summary{display:flex;justify-content:space-between;gap:15px;font:400 24px Georgia,serif;list-style:none}.methods>summary::after{content:'+';font:24px system-ui}.methods[open]>summary::after{content:'−'}.method-grid{display:grid;grid-template-columns:1fr 1fr;gap:25px 36px;padding:24px 0}.method-grid p{font-size:13px;color:var(--muted);margin-top:6px}.method-grid pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px}.footer{margin-top:32px;display:flex;justify-content:space-between;gap:16px;font-size:11px;color:var(--muted)}
+dialog.report{padding:0;max-height:90vh;overflow-y:auto;margin:auto}dialog::backdrop{background:#183331a8;backdrop-filter:blur(3px)}.report-head{display:flex;justify-content:space-between;gap:16px}.close{background:var(--soft);border:0;border-radius:5px;padding:7px 12px;font-size:13px;align-self:start}
+@media(max-width:950px){.wrap{padding:22px 24px 40px}.chart-layout{grid-template-columns:1fr}.toolbar{flex-wrap:wrap}}
+@media(max-width:600px){.wrap{padding:18px 18px 32px}.topline{align-items:start}.topline .caps{font-size:9px;text-align:right}.hero{padding:30px 0 24px;display:block}.hero h1{font-size:46px}.hero .caps{font-size:10px}.lede{font-size:14px}.study{margin-top:22px;display:flex;gap:13px;align-items:center;padding:0;border:0;flex-wrap:wrap}.study strong{font-size:25px}.study p{margin:0;font-size:11px}.study a{margin-left:auto}.toolbar{display:grid;grid-template-columns:1fr;gap:14px;padding:14px}.section-head{display:block}.section-head p{margin-top:9px}.section-head h2{font-size:27px}.comparison,.comparison tbody,.comparison tr,.comparison td{display:block;width:auto}.comparison thead{display:none}.comparison tr{padding:18px;display:grid;grid-template-columns:1fr 1fr;gap:16px}.comparison td{padding:0}.comparison td:first-child,.comparison td:nth-child(2){grid-column:1/-1}.comparison td::before{content:attr(data-label);display:block;color:var(--muted);font-size:11px;margin-bottom:5px}.chart-card{padding:18px}.word-grid,.method-grid{grid-template-columns:1fr}.footer{display:block}.footer p{margin-bottom:8px}.matrix th:first-child{width:30%}}
+@media(prefers-reduced-motion:reduce){.run:hover{transform:none}}
+</style>
 </head>
 <body>
-<main class="report" aria-labelledby="report-title">
-  <header class="report-head"><h1 id="report-title"></h1><p id="report-subtitle"></p></header>
+<main class="wrap">
+  <div class="topline"><div class="brand"><span class="mark" aria-hidden="true"></span>Gem upgrade research</div><span class="caps muted" id="experiment-date"></span></div>
+  <header class="hero" id="experiment-overview">
+    <div><p class="caps">Cost · time · quality · repeatability</p><h1>What did this<br>research cost?</h1><p class="lede" id="experiment-lede"></p></div>
+    <aside class="study" aria-label="Study size"><strong>1</strong><p>completed research report<br>1 gem · 1 configuration</p><a href="#methodology">Read the method ↘</a></aside>
+  </header>
+  <dl class="toolbar" id="experiment-scope"><div><dt>Reports included</dt><dd>One completed worker report</dd></div><div><dt>Gem upgrade</dt><dd id="upgrade-scope"></dd></div><div><dt>Review basis</dt><dd>Evaluator source/runtime review</dd></div></dl>
+  <p class="scope-note"><strong>1 report shown.</strong> One smoke run, not a five-run benchmark group. No model or prompt comparison.</p>
+  <div class="notice" id="outcome-limit"><strong>Review outcomes, not accuracy scores.</strong> The worker completed; the original harness ended in execution_failure. Corrected offline correlation passed, but clean SDK shutdown was not rerun.</div>
+  <section aria-labelledby="comparison-title">
+    <div class="section-head"><h2 id="comparison-title">What this configuration delivered</h2><p>Quality beside cost and elapsed worker time. No weighted score hides the trade-offs.</p></div>
+    <div class="legend"><span><i class="swatch" style="background:#298376"></i>N · No material issue</span><span><i class="swatch" style="background:#bd594d"></i>C · Correction</span><span><i class="swatch" style="background:#bc8b31"></i>V · Verification</span><span><i class="swatch" style="background:#7b8796"></i>I · Insufficient</span></div>
+    <div class="panel"><table class="comparison"><caption hidden>Observed review outcome, recorded session cost and worker time</caption><thead><tr><th scope="col">Configuration</th><th scope="col">Review outcome / verdict mix</th><th scope="col">Recorded cost / report</th><th scope="col">Worker time</th></tr></thead><tbody><tr><td><div class="model-name" id="configuration-name"></div><div class="model-setting" id="configuration-setting"></div><div class="n-label">n = 1 completed research report</div></td><td><div class="quality-number" id="configuration-verdict"></div><div class="stack" id="verdict-stack" role="img"></div><div class="outcomes" id="configuration-findings"></div></td><td data-label="Recorded cost / report"><div class="metric" id="configuration-cost"></div><div class="n-label">Single observation · no distribution</div></td><td data-label="Worker time"><div class="metric" id="configuration-time"></div><div class="n-label">Single observation · no distribution</div></td></tr></tbody></table><p class="table-note">Cost is the recorded cumulative session estimate, including dispatcher work—not account billing. Time covers the research worker only, not the 247.6s interrupted harness. A single result has no meaningful percentile range.</p></div>
+  </section>
+  <div class="chart-layout">
+    <section class="panel chart-card" aria-labelledby="tradeoff-title"><h2 id="tradeoff-title">The observed cost and time</h2><p>One point for one run. This cannot establish a cost–quality trade-off between configurations.</p><figure class="chart-figure" id="observed-cost-time"><div id="scatter"></div><figcaption class="n-label">One observed run, not a distribution or model ranking.</figcaption></figure></section>
+    <section class="panel chart-card" aria-labelledby="variation-title"><h2 id="variation-title">How often did the verdict change?</h2><p>Compare repeated reports for the same gem, model and prompt.</p><div class="unmeasured" id="repeatability">Not measured</div><p>1 run · 0 within-case pairs.</p><p class="variation-explainer">The testing protocol requires five fresh runs per model/prompt configuration and selected case. This one-time smoke trial is not that group. No disagreement percentage can be inferred.</p></section>
+  </div>
+  <section aria-labelledby="runs-title">
+    <div class="section-head"><h2 id="runs-title">Same question. One attempt.</h2><p>The tile opens the original report, its findings and execution evidence.</p></div>
+    <div class="panel"><table class="matrix"><thead><tr><th scope="col">Gem</th><th scope="col" id="run-configuration"></th></tr></thead><tbody><tr><th scope="row" class="gem" id="run-gem"></th><td><button class="run" id="open-report" aria-haspopup="dialog" aria-controls="report-dialog"></button><span class="n-label" id="run-label"></span></td></tr></tbody></table></div>
+  </section>
+  <section aria-labelledby="length-title"><div class="section-head"><h2 id="length-title">How much did they write?</h2><p>One observed report length. More text is not evidence of better research.</p></div><div class="word-grid"><div class="word-card panel" id="report-length"><h3 id="length-configuration"></h3><div class="metric"><span id="report-words"></span> <small>words</small></div><p>Whitespace-separated words, not LLM tokens. No range: n = 1.</p></div></div></section>
+  <details class="methods" id="methodology"><summary>How to read—and not overread—this experiment</summary><div class="method-grid">
+    <section id="method-request"><h3>One fixed upgrade question</h3><p>The frozen request identifies the exact current and requested gem versions. Rails remained at 7.0.8.7 for the Redis-only runtime comparison.</p><pre id="method-input"></pre></section>
+    <section id="method-review"><h3>Research quality is separate from transport</h3><p id="review-method"></p><p>The report was classified as insufficient: it missed active Rails.cache callers and exact target-version research. An additional hiredis-option imprecision was minor. Passing cache checks does not make an incomplete report complete.</p></section>
+    <section id="method-units"><h3>Cost, time and coverage use different units</h3><p>Session cost is the final cumulative SDK estimate. Worker time comes from the completion event. Harness elapsed time includes the idle period before interruption. Four worker tools and 415 words describe effort, not accuracy.</p><p>No percentiles, five-run variation, blinded calibration or controlled model ranking are claimed.</p></section>
+    <section id="method-evidence"><h3>Evidence and limits</h3><p>Raw SDK trace, native session logs, request, manifest, original report and independent runtime observations are retained with checksums. Original execution_failure is preserved; the corrected matcher accepts the saved trace offline.</p><p>Redis-only checks passed five tests and 20 assertions under both client versions with matching app observations. There is no frozen Redis positive-issue rubric, and no production safety or performance claim.</p><ul id="overview-limits"></ul></section>
+  </div><div class="download"><button class="button" id="overview-json">Download report + findings (JSON)</button><button class="button" id="overview-csv">Download metrics (CSV)</button><span class="muted"><small>Report and findings are embedded. No external assets.</small></span></div></details>
+  <footer class="footer"><p>Source-reviewed · runtime checks recorded separately.</p><p>One smoke run · no repeatability estimate</p></footer>
+</main>
+<dialog class="report" id="report-dialog" aria-labelledby="report-title">
+  <header class="report-head"><div><h1 id="report-title"></h1><p id="report-subtitle"></p></div><button class="close" id="close-report">Close ×</button></header>
   <div class="report-body">
     <div class="report-meta" id="report-meta"></div>
     <p class="execution-note" id="execution-note"></p>
@@ -28,14 +74,45 @@
       <div class="download"><button class="button" id="download-json">Download report + findings (JSON)</button><button class="button" id="download-csv">Download metrics (CSV)</button></div>
     </details>
   </div>
-</main>
+</dialog>
 <script type="application/json" id="report-data">__REPORT_DATA__</script>
 <script>
 'use strict';
 const data=JSON.parse(document.getElementById('report-data').textContent);
 const $=id=>document.getElementById(id);
 const verdicts={insufficient:'Insufficient',needs_correction:'Correction',needs_verification:'Verification',no_material_issue_found:'No material issue found'};
-document.title=`${data.request.gem} · ${data.run_id} · Gem upgrade research`;
+const colors={insufficient:'#7b8796',needs_correction:'#bd594d',needs_verification:'#bc8b31',no_material_issue_found:'#298376'};
+const letters={insufficient:'I',needs_correction:'C',needs_verification:'V',no_material_issue_found:'N'};
+document.title=`${data.request.gem} · Cost, time & quality · Gem upgrade research`;
+const configuration=`${data.model_label} / ${data.metrics.effort.replace(/^./,c=>c.toUpperCase())}`;
+$('experiment-date').textContent='Experiment report / '+new Date(data.started_at).toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric',timeZone:'UTC'});
+$('experiment-lede').textContent=`One configuration researched ${data.request.gem} ${data.request.currentVersion} → ${data.request.requestedVersion}. A completed report, an interrupted harness, and a source/runtime review—not a model benchmark.`;
+$('upgrade-scope').textContent=`${data.request.gem} ${data.request.currentVersion} → ${data.request.requestedVersion}`;
+$('configuration-name').textContent=data.model_label;
+$('configuration-setting').textContent=`${data.metrics.effort.replace(/^./,c=>c.toUpperCase())} · minimal researcher prompt`;
+$('configuration-verdict').textContent=verdicts[data.verdict];
+$('verdict-stack').style.background=colors[data.verdict];
+$('verdict-stack').setAttribute('aria-label',`1 ${verdicts[data.verdict]} report`);
+$('configuration-findings').textContent=`1 ${letters[data.verdict]} · ${data.findings.filter(f=>f.severity==='material').length} material findings · ${data.findings.filter(f=>f.severity==='minor').length} minor`;
+$('configuration-cost').textContent=`$${data.metrics.recorded_session_cost_usd.toFixed(2)}`;
+$('configuration-time').textContent=`${data.metrics.worker_seconds.toFixed(1)}s`;
+$('run-configuration').textContent=configuration;
+$('run-gem').textContent=data.request.gem;
+$('open-report').textContent=letters[data.verdict];
+$('open-report').style.background=colors[data.verdict];
+$('open-report').setAttribute('aria-label',`${data.request.gem} ${data.run_id}: ${verdicts[data.verdict]}. Open report`);
+$('run-label').textContent=`${data.run_id} · 1 report · ${verdicts[data.verdict].toLowerCase()}`;
+$('length-configuration').textContent=configuration;
+$('report-words').textContent=data.metrics.report_words;
+$('method-input').textContent=JSON.stringify(data.request,null,2);
+$('review-method').textContent=data.method;
+for(const text of data.limits){const item=document.createElement('li');item.textContent=text;$('overview-limits').append(item)}
+const maxCost=Math.ceil(data.metrics.recorded_session_cost_usd*1.15*10)/10,maxTime=Math.ceil(data.metrics.worker_seconds*1.15/10)*10;
+const x=cost=>60+cost/maxCost*390,y=time=>230-time/maxTime*180;
+let chart='<svg class="scatter" viewBox="0 0 530 290" role="img" aria-label="One observed run: recorded session cost $'+data.metrics.recorded_session_cost_usd.toFixed(3)+', worker time '+data.metrics.worker_seconds.toFixed(1)+' seconds"><text x="60" y="23">Worker time (seconds)</text>';
+for(let i=0;i<=4;i++){const fraction=i/4;chart+=`<line x1="60" x2="450" y1="${y(maxTime*fraction)}" y2="${y(maxTime*fraction)}" stroke="#e2e7df"/><text x="48" y="${y(maxTime*fraction)+4}" text-anchor="end">${Math.round(maxTime*fraction)}</text><text x="${x(maxCost*fraction)}" y="250" text-anchor="middle">$${(maxCost*fraction).toFixed(2)}</text>`;}
+chart+=`<circle cx="${x(data.metrics.recorded_session_cost_usd)}" cy="${y(data.metrics.worker_seconds)}" r="10" fill="#7b8796" fill-opacity=".16"/><circle cx="${x(data.metrics.recorded_session_cost_usd)}" cy="${y(data.metrics.worker_seconds)}" r="5" fill="#7b8796"/><text x="${x(data.metrics.recorded_session_cost_usd)-12}" y="${y(data.metrics.worker_seconds)-14}" text-anchor="end">Observed run · I</text><text x="255" y="280" text-anchor="middle">Recorded session cost (USD)</text></svg>`;
+$('scatter').innerHTML=chart;
 $('report-title').textContent=`${data.request.gem} · ${data.run_id}`;
 $('report-subtitle').textContent=`${data.request.currentVersion} → ${data.request.requestedVersion} · ${data.model_label} / ${data.metrics.effort.replace(/^./,c=>c.toUpperCase())} · ${verdicts[data.verdict]} · Scroll for the full report ↓`;
 const chips=[`$${data.metrics.recorded_session_cost_usd.toFixed(3)} session estimate`,`${data.metrics.worker_seconds.toFixed(1)}s worker`,`${data.metrics.worker_tool_calls} tool calls`,`${data.metrics.report_words} words`,'One smoke run · not a benchmark group'];
@@ -59,6 +136,10 @@ $('provenance').textContent='Native main/subagent logs were recovered from the l
 function download(name,text,type){const url=URL.createObjectURL(new Blob([text],{type}));const link=document.createElement('a');link.href=url;link.download=name;link.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}
 $('download-json').onclick=()=>download('report-and-findings.json',JSON.stringify(data,null,2),'application/json');
 $('download-csv').onclick=()=>download('metrics.csv',data.metrics_csv,'text/csv');
+$('overview-json').onclick=$('download-json').onclick;
+$('overview-csv').onclick=$('download-csv').onclick;
+$('open-report').onclick=()=>{$('report-dialog').showModal();$('report-dialog').scrollTop=0};
+$('close-report').onclick=()=>$('report-dialog').close();
 </script>
 </body>
 </html>

@@ -16,11 +16,18 @@ model and effort fixed while changing the system prompt. When investigating tool
 access, keep the prompt fixed and change tools separately. Retain an unchanged
 baseline run group alongside each candidate group.
 
-Choose repetition counts and a usage budget before launching paid trials. Every
+Use **five fresh runs per model/prompt configuration for each selected case**.
+Set a usage budget before launching those trials. Every
 trial starts fresh, sees no previous reports or grader feedback, and records its
 prompt/tool hashes, app pin, rubric version, raw trace and resolved model/effort.
 Store each variant in a reviewed commit with its own freeze and keep its results
 with that manifest. Do not alter the rubric, request or app to improve a score.
+
+A one-time end-to-end smoke check verifies execution and report delivery. Label
+it separately from five-run benchmark groups; it cannot measure variation.
+Commit original traces, native session logs, reports, reviews and hashes under
+`evals/results/` after checking for secrets. Keep first-pass reviews and final
+adjudications distinct, and preserve the researcher's original text.
 
 Grade without exposing candidate identity to the reviewer. Record positive
 recall, unsupported claims, uncertainty, execution failures, latency and cost

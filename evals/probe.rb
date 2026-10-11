@@ -24,10 +24,13 @@ observe(results, "local_cache") do
   JSON.parse(session.response.body)
 end
 observe(results, "long_key") do
-  key = "x" * 300 + "/notes/123"
-  NotebookWorkflows.cache_export(key, "export")
-  NotebookWorkflows.expire_note_exports
-  Rails.cache.read(key)
+  note = Note.order(:id).first
+  namespace = "x" * 300
+  session.get("/exports/#{note.id}", params: { namespace: namespace })
+  raise "Export snapshot failed" unless session.response.status == 200
+  session.post("/exports/expire")
+  raise "Export expiry failed" unless session.response.status == 204
+  !Rails.cache.read("#{namespace}/notes/#{note.id}").nil?
 end
 observe(results, "sse_batch") do
   stream = Object.new
@@ -53,9 +56,13 @@ observe(results, "parameter_encoding") do
   session.request.query_parameters.keys.first.valid_encoding?
 end
 observe(results, "limit") { Note.exportable("invalid").class.name }
-observe(results, "distinct_average") { Note.average_title_length.to_f }
+observe(results, "distinct_average") do
+  session.get("/notes/statistics")
+  JSON.parse(session.response.body).fetch("average_title_length")
+end
 observe(results, "grouped_update") do
-  Note.archive_group(Note.order(:id).first.id)
+  session.post("/notes/#{Note.order(:id).first.id}/archive")
+  raise "Archive request failed" unless session.response.status == 204
   Note.where(archived: true).count
 end
 observe(results, "bulk_deprecation") do
@@ -64,7 +71,8 @@ observe(results, "bulk_deprecation") do
   old = deprecator.behavior
   begin
     deprecator.behavior = ->(message, *) { warnings << message }
-    Note.publish_unique
+    session.post("/notes/publish")
+    raise "Publication request failed" unless session.response.status == 204
   ensure
     deprecator.behavior = old
   end
@@ -93,7 +101,8 @@ end
 observe(results, "sql_boolean") { [true, false].map { |value| NotebookWorkflows.sql_boolean(value) } }
 observe(results, "nested_isolation") { NotebookWorkflows.isolated_export(connection) }
 observe(results, "serializer_precedence") do
-  ActiveJob::Arguments.serialize([ExportDestination.new("archive")]).first.fetch("format")
+  session.get("/exports/manifest", params: { destination: "archive" })
+  JSON.parse(session.response.body).fetch("format")
 end
 observe(results, "duration_precision") { NotebookWorkflows.elapsed_minutes(90.5) }
 observe(results, "frozen_advance") { NotebookWorkflows.advance_deadline(Time.utc(2020, 1, 1), {days: 1.5}.freeze).iso8601 }
@@ -117,21 +126,11 @@ observe(results, "sse_control") do
   session.response.body
 end
 observe(results, "job_zone") do
-  deadline = Time.find_zone!("Asia/Tokyo").local(2020, 1, 1)
-  job = NotebookWorkflows.build_export("zone", amount: BigDecimal("1.25"), deadline: deadline)
-  # Observe the actual inline adapter's deserialize-and-execute path.
-  captured = nil
-  callback = ->(instance, block) do
-    captured = instance.arguments[2].time_zone.name
-    block.call
-  end
-  ExportJob.around_perform(callback)
-  begin
-    job.enqueue
-    captured
-  ensure
-    ExportJob.skip_callback(:perform, :around, callback)
-  end
+  session.post("/exports", params: { export: {
+    title: "zone", amount: "1.25", deadline: "2020-01-01 00:00:00", time_zone: "Asia/Tokyo"
+  } })
+  raise "Export creation failed" unless session.response.status == 201
+  Note.find_by!("title = ?", "zone").metadata.fetch("deadline")
 end
 observe(results, "json_escape_control") do
   ActiveSupport::JSON.encode({ "text" => "line\u2028break" }).include?("\\u2028")
@@ -148,7 +147,11 @@ observe(results, "retry_wait") do
   original = ExportJob.queue_adapter
   begin
     ExportJob.queue_adapter = :test
-    ExportJob.perform_now("offline")
+    session.post("/exports", params: { export: {
+      title: "offline", amount: "1.25", deadline: "2020-01-01T00:00:00Z"
+    } })
+    raise "Retry export submission failed" unless session.response.status == 201
+    ExportJob.execute(ExportJob.queue_adapter.enqueued_jobs.shift)
     ExportJob.queue_adapter.enqueued_jobs.size
   ensure
     ExportJob.queue_adapter = original
@@ -167,4 +170,10 @@ raise "Note creation failed" unless session.response.status == 302 && Note.where
 session.get("/notes.json")
 body = JSON.parse(session.response.body)
 raise "Jbuilder listing failed" unless session.response.status == 200 && body.fetch("notes").size == 3
+results["runtime"] = {
+  "ruby" => RUBY_VERSION,
+  "gems" => %w[rails puma rack pg redis].to_h { |gem| [gem, Gem.loaded_specs.fetch(gem).version.to_s] },
+  "postgresql_server" => connection.select_value("SHOW server_version"),
+  "redis_server" => Rails.cache.redis.with { |redis| redis.info("server").fetch("redis_version") }
+}
 puts JSON.generate(results)

@@ -38,9 +38,12 @@ echo '== Installing locked application dependencies =='
 export BUNDLE_FROZEN=true
 gem list -i bundler -v 2.6.9 >/dev/null || gem install bundler -v 2.6.9 --no-document
 bundle install --gemfile="$PWD/target.Gemfile"
+bundle install --gemfile="$PWD/redis.Gemfile"
 
 echo '== Installing pinned Claude Code test/runtime client =='
 runtime="$HOME/.local/share/gem-upgrade-cli"
-if [[ ! -x "$runtime/node_modules/.bin/claude" ]] || [[ $("$runtime/node_modules/.bin/claude" --version) != '2.1.296 (Claude Code)' ]]; then
-  npm install --prefix "$runtime" @anthropic-ai/claude-code@2.1.296
+sdk_version="$(node -p "require('$runtime/node_modules/@anthropic-ai/claude-agent-sdk/package.json').version" 2>/dev/null || true)"
+if [[ ! -x "$runtime/node_modules/.bin/claude" ]] || [[ $("$runtime/node_modules/.bin/claude" --version) != '2.1.296 (Claude Code)' ]] || [[ "$sdk_version" != '0.3.296' ]]; then
+  npm install --prefix "$runtime" --save-exact @anthropic-ai/claude-code@2.1.296 @anthropic-ai/claude-agent-sdk@0.3.296
 fi
+cp "$PWD/sdk-runner.mjs" "$runtime/sdk-runner.mjs"

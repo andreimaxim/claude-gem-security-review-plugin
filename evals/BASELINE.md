@@ -2,7 +2,7 @@
 
 [Margin Notes](https://github.com/andreimaxim/margin-notes) is a small PostgreSQL
 notebook application with a JSON API, Jbuilder views, export jobs, Redis caching,
-live note counts and compose form fragments. Its baseline has four Minitest smoke
+live note counts and compose form fragments. Its baseline has five Minitest smoke
 tests and contributor guides. `fixture_source.json` pins its revision and tree.
 
 ## Locked versions
@@ -22,8 +22,9 @@ Ruby 3.2.9 meets both Rails versions' requirements. Keeping the runtime and
 database drivers fixed makes this a framework upgrade, not a Ruby upgrade.
 BigDecimal 3.1.8 and concurrent-ruby 1.3.4 are held constant. Minitest 5 retains
 Rails 7 compatibility. Baseline and target lockfiles freeze the complete stacks;
-Rails-required transitive changes remain part of the comparison. Puma must
-upgrade because Puma 5 rejects the Rack 3 stack selected by Rails 8.
+Rails-required transitive changes remain part of the comparison. Puma 5 rejects
+the selected Rack 3 stack, so this target uses Puma 6.6.1. Rails 8.1 also permits
+Rack 2; this is not a claim that every valid Rails 8.1 stack requires newer Puma.
 
 The checked application uses PostgreSQL 15.19 and Redis 7.0.15 in the Orb.
 The system packages install the distribution's server versions, not a frozen
@@ -33,12 +34,20 @@ Its development signing key and permissive hosts are not production settings.
 
 ## Reproduced impacts
 
-The corpus contains **31 distinct upgrade impacts and nine unchanged controls**.
+The corpus contains **21 scored upgrade impacts and nine unchanged controls**.
 Six prerequisite failures are reproduced separately: Puma/Rack compatibility,
 keyword enum declarations, positional serialization coders, `partial_writes`,
 untyped virtual enums and aliases targeting ordinary methods. After repairing
-those prerequisites, 25 further observations cover queries, rendering, routing,
-Redis keys, job serialization/retries and application helper APIs.
+those prerequisites, 15 scored observations cover queries, rendering, routing,
+Redis keys, job serialization/retries and export preferences. Scored methods have
+application callers. Cache expiry, statistics, archiving, publication, destination
+serialization and job deadlines are reproduced through HTTP requests.
+
+Ten additional diagnostics are recorded without adding scored issues: SSE write
+batching, buffer ownership, limit-validation timing, frozen cache arrays, nested
+isolation, duration precision, deadline options, metadata filtering, slug
+parameterization and the related caption-alias behavior. Several have no app
+caller; changed implementation details alone do not establish an upgrade task.
 
 Some observations are upstream bug fixes or changed integration behavior, not
 new exceptions or required app repairs. Controls and repeated trials do not add
@@ -48,7 +57,7 @@ Puma evidence. File hashes and anchor checks establish identity; runtime checks
 and semantic review establish the behavior.
 
 `check.rb` reproduces all observations, then applies the reference repair and
-regression-test patches. The repaired app passes **33 tests, 85 assertions** at
+regression-test patches. The repaired app passes **34 tests, 90 assertions** at
 seeds 12345 and 67890. The reference tests assert public request, model, job and
 workflow behavior, including asymmetric controls for bulk updates and cache
 expiry. These evaluator-only tests are not in the worker's baseline checkout.
@@ -61,7 +70,7 @@ requiring a particular write count.
 This is a synthetic application, not a production workload or a comprehensive
 Rails migration inventory. Defaults remain 7.0. The benchmark does not measure
 Ruby upgrades, newer-default adoption, deployment behavior or production
-performance. Runtime verification does not measure research accuracy: paid
-Claude research trials have not been run.
+performance. Runtime verification does not measure research accuracy. Recorded
+research trials and their independent reviews belong under `evals/results/`.
 
 See [the evaluator workflow](README.md) for setup, patches and frozen requests.

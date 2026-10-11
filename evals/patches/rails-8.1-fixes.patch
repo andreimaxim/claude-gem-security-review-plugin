@@ -296,12 +296,27 @@ diff --git a/app/controllers/notes_controller.rb b/app/controllers/notes_control
 index 1ee57d0..e5ee892 100644
 --- a/app/controllers/notes_controller.rb
 +++ b/app/controllers/notes_controller.rb
-@@ -45,12 +45,13 @@ class NotesController < ActionController::API
+@@ -45,27 +45,28 @@ class NotesController < ActionController::API
  
    def export
      render json: Note.exportable(params.fetch(:limit, "10")).pluck(:id)
 +  rescue ArgumentError
 +    render json: { error: "Invalid export limit" }, status: :bad_request
+   end
+ 
+   def statistics
+     render json: { average_title_length: Note.average_title_length.to_f }
+   end
+ 
+   def archive
+     note = Note.find(params[:id])
+     Note.archive_group(note.id)
+     head :no_content
+   end
+ 
+   def publish
+     Note.where(archived: false).publish_unique
+     head :no_content
    end
  
    def preview

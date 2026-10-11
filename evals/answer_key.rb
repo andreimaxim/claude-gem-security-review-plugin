@@ -11,7 +11,7 @@ BOOT_ROWS = [
 ].freeze
 
 ROWS = [
-  ["long_key", "activesupport", "Shorter Redis cache keys discard export invalidation suffixes", "app/services/notebook_workflows.rb", nil, "export", "activesupport/lib/active_support/cache.rb", "def normalize_key"],
+  ["long_key", "activesupport", "Shorter Redis cache keys discard export invalidation suffixes", "app/services/notebook_workflows.rb", false, true, "activesupport/lib/active_support/cache.rb", "def normalize_key"],
   ["sse_batch", "actionpack", "SSE batches a logical event into one write", "app/controllers/streams_controller.rb", 3, 1, "actionpack/lib/action_controller/metal/live.rb", "def perform_write"],
   ["stream_buffer", "actionpack", "Stream writes copy mutable buffers and return byte counts", "app/services/notebook_workflows.rb", {"return" => "Array", "body" => "changed"}, {"return" => "Integer", "body" => "é", "bytes" => 2}, "actionpack/lib/action_dispatch/http/response.rb", "def write"],
   ["limit", "activerecord", "Export limit validation moves to relation construction", "app/models/note.rb", "ActiveRecord::Relation", {"error" => "ArgumentError"}, "activerecord/lib/active_record/relation/query_methods.rb", "def limit!"],
@@ -28,7 +28,7 @@ ROWS = [
   ["blank_locale", "actionpack", "Blank locale routing omits the empty segment", "app/controllers/notes_controller.rb", "/locale//products/123", "/products/123", "actionpack/lib/action_dispatch/journey/formatter.rb", "def generate"],
   ["http_date", "actionpack", "Conditional requests recognize RFC850 dates", "app/controllers/notes_controller.rb", 200, 304, "actionpack/lib/action_dispatch/http/cache.rb", "httpdate"],
   ["nil_separator", "activesupport", "Export parameterization accepts a nil separator", "app/services/notebook_workflows.rb", {"error" => "TypeError"}, "donaldeknuth", "activesupport/lib/active_support/inflector/transliterate.rb", "def parameterize"],
-  ["job_zone", "activejob", "Export job serialization retains the caller's timezone", "app/jobs/export_job.rb", "UTC", "Asia/Tokyo", "activejob/lib/active_job/serializers/time_with_zone_serializer.rb", "def deserialize"],
+  ["job_zone", "activejob", "Export job serialization retains the caller's timezone", "app/jobs/export_job.rb", "2019-12-31T15:00:00Z", "2020-01-01T00:00:00+09:00", "activejob/lib/active_job/serializers/time_with_zone_serializer.rb", "def deserialize"],
   ["caption_alias", "activerecord", "Attribute aliases bypass the overridden display reader", "app/models/note.rb", "Note: Example", "Example", "activerecord/lib/active_record/attribute_methods.rb", "alias_attribute"],
   ["legacy_label", "rails", "Application secrets accessor is removed", "app/services/export_preferences.rb", "Margin Notes", {"error" => "NoMethodError"}, "railties/lib/rails/application.rb", "def credentials"],
   ["global_timezone", "activerecord", "Global settings delegation through ActiveRecord::Base is removed", "app/services/export_preferences.rb", "utc", {"error" => "NoMethodError"}, "activerecord/lib/active_record/core.rb", "default_timezone"],
@@ -73,6 +73,20 @@ issues.each do |item|
   end
 end
 
+diagnostic_probes = %w[sse_batch stream_buffer limit delete_multi nested_isolation
+  duration_precision frozen_advance indifferent_filter nil_separator caption_alias]
+diagnostics, issues = issues.partition { |item| diagnostic_probes.include?(item["probe"]) }
+issues.each do |item|
+  item["caller"] = case item["probe"]
+  when "long_key", "serializer_precedence", "job_zone", "retry_wait"
+    "app/controllers/exports_controller.rb"
+  when "puma_rack"
+    "config/application.rb"
+  else
+    "app/controllers/notes_controller.rb"
+  end
+end
+
 CONTROL_ROWS = [
   ["timestamp_cast", "PostgreSQL timestamp exports are typed at both endpoints", "Time", "activerecord/lib/active_record/connection_adapters/postgresql/database_statements.rb", "def query"],
   ["parameter_encoding", "Malformed parameter names are rejected at both endpoints", {"error" => "ActionController::BadRequest"}, "actionpack/lib/action_dispatch/http/request.rb", "query_parameters"],
@@ -86,9 +100,10 @@ CONTROL_ROWS = [
 ].freeze
 
 ANSWER_KEY = {
-  "version" => 2, "requested_positive_count" => 31, "status" => "complete",
+  "version" => 3, "requested_positive_count" => 21, "status" => "complete",
   "baseline_rails" => "7.0.8.7", "target_rails" => "8.1.4", "ruby" => "3.2.9", "defaults" => "7.0",
   "issues" => issues,
+  "diagnostics" => diagnostics,
   "controls" => CONTROL_ROWS.each_with_index.map do |(probe, title, expected, source, anchor), index|
     { "id" => format("C%03d", index + 1), "probe" => probe, "title" => title,
       "location" => "app/services/notebook_workflows.rb", "baseline" => expected, "target" => expected,

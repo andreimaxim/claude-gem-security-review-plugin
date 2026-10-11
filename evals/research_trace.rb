@@ -1,13 +1,13 @@
 # Correlate the selected request, tool acknowledgement and worker notification.
 class ResearchTrace
-  attr_reader :tools, :worker_id, :notification
+  attr_reader :tools, :worker_id, :notification, :handoff_result
 
   def initialize(request)
     @request = request
     @tools = {}
     @results = {}
     @notifications = {}
-    @followup = false
+    @turn_results = []
   end
 
   def observe(event)
@@ -24,11 +24,22 @@ class ResearchTrace
         @worker_id = text.to_s[/Research started for .* \(agent ([^)]+)\)\./, 1]
       end
     end
-    if event["subtype"] == "task_notification"
+    if event["type"] == "system" && event["subtype"] == "task_notification"
       @notifications[event["task_id"]] = event
     end
+    @turn_results << event if event["type"] == "result"
     @notification = @notifications[@worker_id] if @worker_id
-    @followup ||= event["type"] == "result" && event.fetch("result_index", 0) > 0 && !event["is_error"]
+    @handoff_result = nil
+    if report
+      payload = "Research #{@request.fetch('gem')} #{@request.fetch('currentVersion')} → #{@request.fetch('requestedVersion')} (agent #{@worker_id}) completed.\n\n#{report}"
+      @handoff_result = @turn_results.find do |result|
+        origin = result["origin"]
+        next false unless result["subtype"] == "success" && result["is_error"] == false &&
+          origin.is_a?(Hash) && origin["kind"] == "task-notification" && result["result"] == payload
+        !origin.key?("runId") || (origin["runId"].is_a?(String) && !origin["runId"].empty? &&
+          origin["runId"] == @notification["run_id"])
+      end
+    end
   end
 
   def research_calls
@@ -44,7 +55,7 @@ class ResearchTrace
   end
 
   def handoff?
-    terminal? && @followup
+    terminal? && !@handoff_result.nil?
   end
 
   def report

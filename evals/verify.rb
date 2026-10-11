@@ -4,7 +4,7 @@ require "digest"
 require_relative "answer_key"
 
 root = File.expand_path("..", __dir__)
-items = ANSWER_KEY.fetch("issues") + ANSWER_KEY.fetch("controls")
+items = ANSWER_KEY.fetch("issues") + ANSWER_KEY.fetch("controls") + ANSWER_KEY.fetch("diagnostics")
 abort "Duplicate issue/control IDs or probes" unless %w[id probe].all? { |field| items.map { |item| item.fetch(field) }.uniq.size == items.size }
 abort "A positive finding has no before/after distinction" unless ANSWER_KEY["issues"].all? { |item| item["baseline"] != item["target"] }
 abort "A control has changed" unless ANSWER_KEY["controls"].all? { |item| item["baseline"] == item["target"] }

@@ -31,20 +31,20 @@ frozen_files.reject { |path| path.start_with?("evals/") }.each do |path|
   FileUtils.mkdir_p(File.dirname(target))
   FileUtils.cp(File.join(root, path), target)
 end
-FileUtils.cp(File.join(__dir__, "observe.ts"), File.join(plugin, "hooks/observe.ts"))
-hooks_path = File.join(plugin, "hooks/hooks.json")
-hooks = JSON.parse(File.read(hooks_path))
-hooks["modules"] << "./observe.ts"
-File.write(hooks_path, JSON.pretty_generate(hooks) + "\n")
+observer = File.read(File.join(__dir__, "observe.ts")).split("export const register: Register = (on) => {", 2).fetch(1).delete_suffix("}\n")
+registration = File.join(plugin, "hooks/register.ts")
+File.write(registration, File.read(registration).sub(/\n}\s*\z/, "\n#{observer}\n}\n"))
 
 cases = (["rails"] + ANSWER_KEY["issues"].map { |item| item["gem"] }.uniq.sort).uniq.map do |gem|
-  { "id" => gem, "request" => { "gem" => gem, "currentVersion" => ANSWER_KEY.fetch("baseline_rails"), "requestedVersion" => ANSWER_KEY.fetch("target_rails") }, "control" => false }
+  { "id" => gem, "request" => { "gem" => gem, "currentVersion" => ANSWER_KEY.fetch("baseline_rails"), "requestedVersion" => ANSWER_KEY.fetch("target_rails") }, "control" => false, "rubric_version" => ANSWER_KEY["version"] }
 end
-cases << { "id" => "jbuilder-same-version", "request" => { "gem" => "jbuilder", "currentVersion" => "2.13.0", "requestedVersion" => "2.13.0" }, "control" => true }
+cases << { "id" => "jbuilder-same-version", "request" => { "gem" => "jbuilder", "currentVersion" => "2.13.0", "requestedVersion" => "2.13.0" }, "control" => true, "rubric_version" => ANSWER_KEY["version"] }
+cases << { "id" => "redis", "request" => { "gem" => "redis", "currentVersion" => "4.8.1", "requestedVersion" => "5.4.1" }, "control" => false, "rubric_version" => nil }
 manifest = {
-  "schema_version" => 1, "status" => ANSWER_KEY["status"], "positive_issues" => ANSWER_KEY["issues"].size,
+  "schema_version" => 2, "status" => ANSWER_KEY["status"], "positive_issues" => ANSWER_KEY["issues"].size,
   "requested_positive_issues" => ANSWER_KEY.fetch("requested_positive_count"), "nonissue_controls" => ANSWER_KEY["controls"].size,
   "application_source" => JSON.parse(File.read(File.join(__dir__, "fixture_source.json"))),
+  "application_files" => files.split("\0"),
   "application_sha256" => Digest::SHA256.file(snapshot).hexdigest,
   "freeze_sha256" => Digest::SHA256.file(File.join(__dir__, "freeze.json")).hexdigest,
   "plugin_files" => Dir.glob("#{plugin}/**/*", File::FNM_DOTMATCH).select { |path| File.file?(path) }.sort.to_h { |path| [path.delete_prefix(plugin + "/"), Digest::SHA256.file(path).hexdigest] },

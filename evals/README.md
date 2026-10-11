@@ -2,7 +2,8 @@
 
 Research Rails **7.0.8.7 → 8.1.4** against
 [Margin Notes](https://github.com/andreimaxim/margin-notes). The frozen corpus has
-31 upgrade impacts and nine unchanged controls. [BASELINE.md](BASELINE.md)
+21 scored upgrade impacts and nine unchanged controls. Ten further diagnostics
+are unscored. [BASELINE.md](BASELINE.md)
 defines the stacks and limits.
 
 Run evaluation preparation and grading here. Start testing agents in fresh
@@ -17,7 +18,7 @@ Add `andreimaxim/margin-notes` to this Amp project's **Other repos to check out*
 Amp provides the application alongside this repository. The root `.agents/setup`
 calls `evals/setup`: it prepares the app's PostgreSQL/Redis services and baseline
 bundle, installs Ruby 3.2.9 through mise, trusts both project configurations,
-installs the target bundle and Claude Code 2.1.296. Setup runs no tests or trials.
+installs the target bundle, Claude Code 2.1.296 and Agent SDK 0.3.296. Setup runs no tests or trials.
 Resume restarts managed services without installing dependencies.
 
 For manual setup, run from `evals/`:
@@ -51,9 +52,9 @@ it, and compares the remaining observations after those repairs. It then applies
 the complete reference repair plus Minitest tests and checks both seeds. Success:
 
 ```text
-33 runs, 85 assertions, 0 failures, 0 errors, 0 skips
-33 runs, 85 assertions, 0 failures, 0 errors, 0 skips
-PASS: 31 distinct upgrade impacts and 9 controls reproduced.
+34 runs, 90 assertions, 0 failures, 0 errors, 0 skips
+34 runs, 90 assertions, 0 failures, 0 errors, 0 skips
+PASS: 21 distinct upgrade impacts and 9 controls reproduced.
 ```
 
 To inspect a repaired app yourself, apply these from its root in a disposable Orb:
@@ -86,9 +87,21 @@ The researcher starts with a minimal system prompt asking for application impact
 and source-backed findings, with read-only tools and a three-string contract.
 Preparation also defines overlapping component requests for
 actionpack, actionview, activejob, activerecord and activesupport at those exact
-versions, plus a Jbuilder 2.13.0 → 2.13.0 control. These are seven requests, not
-seven independent issue sets. Repeat a selected request with the same app,
-plugin and prompt, recording separate results rather than pooling discoveries.
+versions, plus a Jbuilder 2.13.0 → 2.13.0 control. These overlap; they are not
+independent issue sets. An additional Redis 4.8.1 → 5.4.1 request is available for
+an exploratory end-to-end check, with no frozen quality rubric. There are eight
+requests. Use five fresh runs per model/prompt configuration for each selected
+benchmark case, recording separate results rather than pooling discoveries.
+
+For the Redis smoke trial, `redis.Gemfile.lock` holds Rails at 7.0.8.7 while
+upgrading the client to 5.4.1. `ruby redis_check.rb /path/to/margin-notes
+/tmp/redis-observations.json` checks the current app observations and its five
+Minitest smoke tests under both clients. These callers use Rails.cache; they
+do not establish a positive benchmark for unused Redis command APIs.
+
+`sdk-runner.mjs` freezes the main agent's dispatcher system prompt. The researcher
+has its own whole system prompt from `prompts/research.md`; it does not inherit
+the dispatcher prompt. Project CLAUDE.md instructions are loaded separately.
 
 `freeze.json` hashes the plugin, rubric, scripts, target lockfile, reference
 patches and app pin. The app Git tree pins its baseline source and lockfile.
@@ -112,18 +125,19 @@ model/effort. The manifest and evaluator files remain outside worker mounts.
 The tar includes tracked encrypted credentials ciphertext; decryption keys,
 generated databases, logs and Git history are excluded.
 
-The optional Linux CLI runner uses Bubblewrap for an answer-free local worker
+The SDK runner uses Bubblewrap for an answer-free local worker
 mount with fresh HOME and no evaluator checkout or Git credentials. Separate
 testing-agent Orbs provide the intended workspace boundary; namespace testing
 is not a prerequisite for the Rails reproduction above. `test_workflow.rb`
-exercises packaging, namespace containment and streaming/grade protocol checks;
-it does not run a model or prove research accuracy.
+checks package/live-source parity, deterministic packaging and handoff/grading
+protocol cases. It runs no isolation checks or model sessions.
 
 ## Run one selected Claude trial
 
 This consumes model usage. Supply `ANTHROPIC_API_KEY` or
 `CLAUDE_CODE_OAUTH_TOKEN` through a secret manager. `CLAUDE_RUNTIME` can select an
-installed CLI prefix. Each call uses a fresh session; no paid batch runs implicitly.
+installed CLI/SDK prefix. Each call uses a fresh session; no paid batch runs implicitly.
+The SDK budget is $5 per session, with a 900-second runner deadline and no retries.
 
 ```sh
 ruby run.rb /tmp/notebook-package rails /tmp/notebook-run-01
@@ -132,19 +146,30 @@ ruby summarize.rb /tmp/notebook-run-01
 
 The runner keeps streaming stdin open until worker completion and the main
 follow-up, matches the three tool inputs, and binds the report to the acknowledged
-worker ID. It retains raw traces, request, manifest, timing and handoff state;
-it times out after 900 seconds and never retries. Summarization deduplicates tool
+worker ID. It requires the exact ID-bearing completion payload in a successful
+task-notification-origin result, joining events in either order. An explicit
+conflicting run ID is rejected. This verifies functional report delivery, not
+authenticated producer provenance. It retains raw traces, request, manifest,
+native main/subagent JSONL transcripts, stderr, timing and handoff state.
+Summarization deduplicates tool
 IDs and uses the final usage record rather than summing streaming messages.
 Unresolved model/effort is flagged. Cost fields are estimates, not invoices.
 Preserve execution failures separately from research-quality results.
+
+Commit reviewed evidence under `evals/results/<case-and-run>/`: preserve the
+original report, raw SDK trace, native session transcripts, request, manifest,
+summary, stderr and independent review. Scan for credentials before publication.
+Record hashes and label any redactions. One-time smoke checks are not five-run
+benchmark groups and cannot establish run-to-run variation.
 
 ## Grade independently
 
 Give a reviewer the report, rubric and tagged evidence, without model, effort,
 timing or cost metadata. Require literal quotations and source-backed reasoning.
-For `rails`, review all 31 positives; for a component, review its rows. Compare
+For `rails`, review all 21 positives; for a component, review its rows. Compare
 negative statements against all nine controls and record contradictions as
-false claims. Same-version requests have no expected positives.
+false claims. Same-version requests have no expected positives. Redis smoke
+reports require a source/runtime review, not a score against the Rails rubric.
 
 ```json
 {
@@ -160,7 +185,9 @@ false claims. Same-version requests have no expected positives.
 
 Include every expected issue, using `found`, `omitted` or `uncertain`; omissions
 have empty quotations. False claims require `quote`, `reason` and frozen
-`sources`. The reviewer owns semantic correctness, not a keyword matcher.
+`sources`. References can use `sources.json` URLs or the pinned app's GitHub blob
+URLs for paths recorded in the package manifest. The reviewer owns semantic
+correctness, not a keyword matcher.
 
 ```sh
 ruby grade.rb /tmp/notebook-run-01 /private/review-01.json
@@ -168,7 +195,7 @@ ruby grade.rb /tmp/notebook-run-01 /private/review-01.json
 
 The validator checks completeness, literal quotes, frozen references and report,
 request and rubric identity. It writes review-hash filenames without overwriting.
-Keep initial reviews and adjudications separately. Paid model trials have not
-certified the CLI lifecycle or research accuracy end to end.
+Keep initial reviews and adjudications separately. A successful transport check
+does not certify research accuracy or benchmark repeatability.
 
 See [EXPERIMENTS.md](EXPERIMENTS.md) for prompt iteration and independent holdouts.

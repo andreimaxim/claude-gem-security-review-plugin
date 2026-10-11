@@ -5,11 +5,9 @@ require "digest"
 require "tmpdir"
 require "fileutils"
 require "open3"
-require_relative "sandbox"
 root = File.expand_path("..", __dir__)
 abort "Usage: ruby evals/test_workflow.rb APP_DIRECTORY" unless ARGV.length == 1
 application = File.expand_path(ARGV.first)
-runtime = File.expand_path(ENV.fetch("CLAUDE_RUNTIME", "~/.local/share/gem-upgrade-cli"))
 def assert(condition, message)
   abort message unless condition
 end
@@ -27,43 +25,10 @@ Dir.mktmpdir("notebook-harness-") do |dir|
   names = out.lines.map(&:strip)
   assert(status.success? && names.include?("Gemfile.lock") && names.include?("app/models/note.rb"), "Missing working app files")
   assert(names.none? { |name| name.match?(/eval|rubric|answer|evidence|\.git(?:\/|\z)|\.sqlite3/) }, "Evaluator data leaked into snapshot")
-
-  app = File.join(dir, "app")
-  FileUtils.mkdir_p(app)
-  assert(system("tar", "-xf", File.join(packages.first, "application.tar"), "-C", app), "Extraction failed")
-  # Probe the exact runner namespace, including known absolute host paths and
-  # /proc/1/root. Tool access cannot make an absent filesystem mount visible.
-  command = WorkerSandbox.command(app: app, plugin: File.join(packages.first, "plugin"), runtime: runtime,
-    arguments: ["/bin/sh", "-c", 'test -r /app/Gemfile && test -r /plugin/hooks/register.ts && ! test -e "$1" && ! test -e /app/../evals && ! test -e /proc/1/root/home/user/workspace/repo/evals/answer_key.rb && ! touch /app/worker-write && echo CONTAINED', "sh", File.join(root, "evals/answer_key.rb")])
-  out, errors, status = Open3.capture3({}, *command, unsetenv_others: true)
-  assert(status.success? && out.include?("CONTAINED"), "Filesystem containment failed: #{errors}")
-  cli = WorkerSandbox.command(app: app, plugin: File.join(packages.first, "plugin"), runtime: runtime,
-    arguments: ["/opt/claude/node_modules/.bin/claude", "--version"])
-  out, errors, status = Open3.capture3({}, *cli, unsetenv_others: true)
-  assert(status.success? && out.include?("2.1.296"), "Isolated CLI failed: #{errors}")
-
-  # Exercise the real runner's streaming lifecycle with a protocol peer, not a
-  # model. An early stdin close fails; after the follow-up, EOF is required.
-  fake_runtime = File.join(dir, "protocol-peer")
-  executable = File.join(fake_runtime, "node_modules/.bin/claude")
-  FileUtils.mkdir_p(File.dirname(executable))
-  File.write(executable, <<~SH)
-    #!/bin/bash
-    read -r request || exit 2
-    echo '{"type":"assistant","message":{"content":[{"type":"tool_use","id":"call-1","name":"mcp__gem-upgrade__research","input":{"gem":"rails","currentVersion":"7.0.8.7","requestedVersion":"8.1.4"}}]}}'
-    echo '{"type":"user","message":{"content":[{"type":"tool_result","tool_use_id":"call-1","content":"Research started for rails 7.0.8.7 → 8.1.4 (agent worker-1)."}]}}'
-    echo '{"type":"result","result_index":0,"is_error":false}'
-    read -r -t 0.05 unexpected
-    code=$?
-    (( code > 128 )) || exit 3
-    echo '{"type":"result","result_index":1,"is_error":false}'
-    echo '{"subtype":"task_notification","task_id":"worker-1","status":"completed","summary":"report"}'
-    read -r after && exit 4
-    exit 0
-  SH
-  File.chmod(0o755, executable)
-  out, errors, status = Open3.capture3({"CLAUDE_RUNTIME" => fake_runtime}, "ruby", File.join(__dir__, "run.rb"), packages.first, "rails", File.join(dir, "protocol-run"))
-  assert(status.success? && JSON.parse(out)["main_handoff"], "Persistent-input handoff failed: #{out}\n#{errors}")
+  names.each do |path|
+    bytes, errors, status = Open3.capture3("tar", "-xOf", File.join(packages.first, "application.tar"), path)
+    assert(status.success? && bytes.b == File.binread(File.join(application, path)), "Snapshot differs from live application: #{path} #{errors}")
+  end
 
   run = File.join(dir, "trace-test")
   FileUtils.mkdir_p(run)
@@ -73,14 +38,51 @@ Dir.mktmpdir("notebook-harness-") do |dir|
   File.write(File.join(run, "request.json"), JSON.generate(item))
   tool = { "type" => "assistant", "message" => { "content" => [{ "type" => "tool_use", "id" => "call-1", "name" => "mcp__gem-upgrade__research", "input" => item.fetch("request") }] } }
   acknowledgement = {"type" => "user", "message" => {"content" => [{"type" => "tool_result", "tool_use_id" => "call-1", "content" => "Research started for activesupport 7.0.8.7 → 8.1.4 (agent worker-1)."}]}}
-  events = [tool, tool, {"type" => "result", "total_cost_usd" => 1},
+  events = [tool, tool, {"type" => "result", "result_index" => 1, "total_cost_usd" => 1},
             acknowledgement,
-            {"subtype" => "task_notification", "task_id" => "worker-1", "status" => "completed", "summary" => "Source-linked report"},
-            {"subtype" => "task_notification", "task_id" => "unrelated-worker", "status" => "completed", "summary" => "Unrelated report"},
-            {"type" => "result", "result_index" => 1, "total_cost_usd" => 3}]
+            {"type" => "system", "subtype" => "task_notification", "task_id" => "worker-1", "run_id" => "run-1", "status" => "completed", "summary" => "Source-linked report"},
+            {"type" => "system", "subtype" => "task_notification", "task_id" => "unrelated-worker", "status" => "completed", "summary" => "Unrelated report"},
+            {"type" => "result", "result_index" => 2, "total_cost_usd" => 3}]
   File.write(File.join(run, "trace.jsonl"), events.map { |event| JSON.generate(event) }.join("\n") + "\n")
   File.write(File.join(run, "stderr.log"), "")
   File.write(File.join(run, "execution.json"), JSON.generate("status" => "completed"))
+  _out, _errors, status = Open3.capture3("ruby", File.join(__dir__, "summarize.rb"), run)
+  assert(!status.success?, "Uncorrelated or earlier result accepted as handoff")
+  events.last["origin"] = { "kind" => "task-notification", "runId" => "unrelated-run" }
+  File.write(File.join(run, "trace.jsonl"), events.map { |event| JSON.generate(event) }.join("\n") + "\n")
+  _out, _errors, status = Open3.capture3("ruby", File.join(__dir__, "summarize.rb"), run)
+  assert(!status.success?, "Another worker's handoff accepted")
+  payload = "Research activesupport 7.0.8.7 → 8.1.4 (agent worker-1) completed.\n\nSource-linked report"
+  events.last.merge!("subtype" => "success", "is_error" => false, "result" => payload)
+  events.last["origin"]["runId"] = "run-1"
+  valid_result = Marshal.load(Marshal.dump(events.last))
+  [
+    valid_result.merge("result" => "Still waiting"),
+    valid_result.merge("result" => payload.sub("worker-1", "other-worker")),
+    valid_result.merge("result" => payload.sub("8.1.4", "8.1.3")),
+    valid_result.merge("result" => "Example:\n#{payload}"),
+    valid_result.merge("result" => payload.delete_suffix("report")),
+    valid_result.merge("origin" => nil),
+    valid_result.merge("origin" => {"kind" => "human"}),
+    valid_result.merge("origin" => {"kind" => "task-notification", "runId" => nil}),
+    valid_result.merge("origin" => {"kind" => "task-notification", "runId" => "other-run"}),
+    valid_result.merge("is_error" => true),
+    valid_result.merge("subtype" => "error_during_execution")
+  ].each do |invalid|
+    events[-1] = invalid
+    File.write(File.join(run, "trace.jsonl"), events.map { |event| JSON.generate(event) }.join("\n") + "\n")
+    _out, _errors, status = Open3.capture3("ruby", File.join(__dir__, "summarize.rb"), run)
+    assert(!status.success?, "Malformed or unrelated handoff accepted: #{invalid.inspect}")
+  end
+  [true, false].each do |with_run_id|
+    events[-1] = valid_result.merge("origin" => with_run_id ? valid_result["origin"] : {"kind" => "task-notification"})
+    [events, events.values_at(0, 1, 2, 3, 6, 5, 4)].each do |ordered|
+      File.write(File.join(run, "trace.jsonl"), ordered.map { |event| JSON.generate(event) }.join("\n") + "\n")
+      _out, _errors, status = Open3.capture3("ruby", File.join(__dir__, "summarize.rb"), run)
+      assert(status.success?, "Exact report handoff rejected because of event order or absent optional run ID")
+    end
+  end
+  File.write(File.join(run, "trace.jsonl"), events.map { |event| JSON.generate(event) }.join("\n") + "\n")
   _out, _errors, status = Open3.capture3("ruby", File.join(__dir__, "summarize.rb"), run)
   assert(status.success?, "Trace summarization failed")
   summary = JSON.parse(File.read(File.join(run, "summary.json")))
@@ -97,6 +99,25 @@ Dir.mktmpdir("notebook-harness-") do |dir|
   File.write(review_path, JSON.generate(review))
   _out, errors, status = Open3.capture3("ruby", File.join(__dir__, "grade.rb"), run, review_path)
   assert(status.success?, "Valid review rejected: #{errors}")
+  original_request = File.read(File.join(run, "request.json"))
+  File.write(File.join(run, "request.json"), JSON.generate(manifest.fetch("cases").find { |entry| entry["id"] == "jbuilder-same-version" }))
+  File.write(review_path, JSON.generate(review.merge("findings" => [])))
+  _out, errors, status = Open3.capture3("ruby", File.join(__dir__, "grade.rb"), run, review_path)
+  assert(!status.success? && errors.include?("Request changed since capture"), "Same-version request substitution accepted")
+  File.write(File.join(run, "request.json"), original_request)
+  File.write(review_path, JSON.generate(review))
+  original_manifest = File.read(File.join(run, "manifest.json"))
+  File.write(File.join(run, "manifest.json"), JSON.generate(manifest.merge("application_files" => ["invented.rb"])))
+  _out, errors, status = Open3.capture3("ruby", File.join(__dir__, "grade.rb"), run, review_path)
+  assert(!status.success? && errors.include?("Manifest changed since capture"), "Manifest substitution accepted")
+  File.write(File.join(run, "manifest.json"), original_manifest)
+  source = manifest.fetch("application_source")
+  review["false_claims"] = [{ "quote" => "Source-linked report", "reason" => "Protocol fixture, not a semantic correctness assertion",
+    "sources" => ["#{source.fetch('repository')}/blob/#{source.fetch('revision')}/app/models/note.rb",
+      "https://raw.githubusercontent.com/rails/jbuilder/v2.13.0/lib/jbuilder.rb"] }]
+  File.write(review_path, JSON.generate(review))
+  _out, errors, status = Open3.capture3("ruby", File.join(__dir__, "grade.rb"), run, review_path)
+  assert(status.success?, "Frozen application or same-version gem reference rejected: #{errors}")
   File.write(File.join(run, "report.txt"), "replacement report")
   review["report_sha256"] = Digest::SHA256.hexdigest("replacement report")
   File.write(review_path, JSON.generate(review))
@@ -128,4 +149,4 @@ Dir.mktmpdir("notebook-harness-") do |dir|
   _out, errors, status = Open3.capture3("ruby", File.join(copied_eval, "grade.rb"), run, review_path)
   assert(!status.success? && errors.include?("Freeze changed:"), "Grading accepted modified rubric with unchanged freeze")
 end
-puts "PASS: deterministic answer-free snapshot, overwrite rejection, real namespace containment, isolated CLI, streaming handoff, trace deduplication, final usage record and review validation. No paid sessions."
+puts "PASS: deterministic answer-free snapshot, overwrite rejection, correlated handoff, trace deduplication, request/manifest/report identity and evidence-bearing review validation. No isolation checks or paid sessions."

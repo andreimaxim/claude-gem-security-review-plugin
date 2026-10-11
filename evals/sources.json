@@ -702,5 +702,141 @@
     "url": "https://raw.githubusercontent.com/puma/puma/v6.6.1/LICENSE",
     "path": "evidence/puma/puma/v6.6.1/LICENSE",
     "sha256": "4aa997b8c797a11bc0c6b8439124825970d298dc36b008dfc8d8e65652deee85"
+  },
+  {
+    "repository": "rails/jbuilder",
+    "tag": "v2.13.0",
+    "file": "jbuilder.gemspec",
+    "url": "https://raw.githubusercontent.com/rails/jbuilder/v2.13.0/jbuilder.gemspec",
+    "path": "evidence/rails/jbuilder/v2.13.0/jbuilder.gemspec",
+    "sha256": "f5964cfadd84a27cad1db95f54893ad44dcb889f05b37ffe1c3ca1eb547097c5"
+  },
+  {
+    "repository": "rails/jbuilder",
+    "tag": "v2.13.0",
+    "file": "lib/jbuilder.rb",
+    "url": "https://raw.githubusercontent.com/rails/jbuilder/v2.13.0/lib/jbuilder.rb",
+    "path": "evidence/rails/jbuilder/v2.13.0/lib/jbuilder.rb",
+    "sha256": "54e91ad7fe80f5992ec342589c95a81d79417322bc738280355c2d46a3c170e9"
+  },
+  {
+    "repository": "rails/jbuilder",
+    "tag": "v2.13.0",
+    "file": "MIT-LICENSE",
+    "url": "https://raw.githubusercontent.com/rails/jbuilder/v2.13.0/MIT-LICENSE",
+    "path": "evidence/rails/jbuilder/v2.13.0/MIT-LICENSE",
+    "sha256": "0bab9d6a90110df4e0b550ae624fce986f60095e18827235a7025cb63780c7c0"
+  },
+  {
+    "repository": "redis/redis-rb",
+    "tag": "v4.8.1",
+    "file": "LICENSE",
+    "url": "https://raw.githubusercontent.com/redis/redis-rb/v4.8.1/LICENSE",
+    "path": "evidence/redis/redis-rb/v4.8.1/LICENSE",
+    "sha256": "ef807cea2628b4819efcd500a9fa958d8c824df8b05bfbbce63ea19a7e48ec77"
+  },
+  {
+    "repository": "redis/redis-rb",
+    "tag": "v4.8.1",
+    "file": "redis.gemspec",
+    "url": "https://raw.githubusercontent.com/redis/redis-rb/v4.8.1/redis.gemspec",
+    "path": "evidence/redis/redis-rb/v4.8.1/redis.gemspec",
+    "sha256": "5d7448a1c9320d4f6b884c8cfdfc17ea9d05b4202598c60603e7a4d0e185d66a"
+  },
+  {
+    "repository": "redis/redis-rb",
+    "tag": "v4.8.1",
+    "file": "lib/redis.rb",
+    "url": "https://raw.githubusercontent.com/redis/redis-rb/v4.8.1/lib/redis.rb",
+    "path": "evidence/redis/redis-rb/v4.8.1/lib/redis.rb",
+    "sha256": "5049be51fb6824a5eaa4770e088f0f680d676ab2cf1532a467ac04bfaaaa488a"
+  },
+  {
+    "repository": "redis/redis-rb",
+    "tag": "v4.8.1",
+    "file": "lib/redis/version.rb",
+    "url": "https://raw.githubusercontent.com/redis/redis-rb/v4.8.1/lib/redis/version.rb",
+    "path": "evidence/redis/redis-rb/v4.8.1/lib/redis/version.rb",
+    "sha256": "689a82d3b06002a0fcfc14ec4398c5ce513249ae005424f859ffb1b636501699"
+  },
+  {
+    "repository": "redis/redis-rb",
+    "tag": "v4.8.1",
+    "file": "lib/redis/commands/sets.rb",
+    "url": "https://raw.githubusercontent.com/redis/redis-rb/v4.8.1/lib/redis/commands/sets.rb",
+    "path": "evidence/redis/redis-rb/v4.8.1/lib/redis/commands/sets.rb",
+    "sha256": "32227be9b1bf3c09bc24292aa6600949b030129c2c12f1e2172e23495d43a69a"
+  },
+  {
+    "repository": "redis/redis-rb",
+    "tag": "v4.8.1",
+    "file": "lib/redis/commands/transactions.rb",
+    "url": "https://raw.githubusercontent.com/redis/redis-rb/v4.8.1/lib/redis/commands/transactions.rb",
+    "path": "evidence/redis/redis-rb/v4.8.1/lib/redis/commands/transactions.rb",
+    "sha256": "b329892d372e518d3e3ae23d2afdfc26b4381257103c790f4e2291030242aa32"
+  },
+  {
+    "repository": "redis/redis-rb",
+    "tag": "v4.8.1",
+    "file": "lib/redis/commands/lists.rb",
+    "url": "https://raw.githubusercontent.com/redis/redis-rb/v4.8.1/lib/redis/commands/lists.rb",
+    "path": "evidence/redis/redis-rb/v4.8.1/lib/redis/commands/lists.rb",
+    "sha256": "f0f88e22b18e0bf0214277a5897b0de1c902dd426d47deb5f9f59e76a2bbc73a"
+  },
+  {
+    "repository": "redis/redis-rb",
+    "tag": "v5.4.1",
+    "file": "LICENSE",
+    "url": "https://raw.githubusercontent.com/redis/redis-rb/v5.4.1/LICENSE",
+    "path": "evidence/redis/redis-rb/v5.4.1/LICENSE",
+    "sha256": "ef807cea2628b4819efcd500a9fa958d8c824df8b05bfbbce63ea19a7e48ec77"
+  },
+  {
+    "repository": "redis/redis-rb",
+    "tag": "v5.4.1",
+    "file": "redis.gemspec",
+    "url": "https://raw.githubusercontent.com/redis/redis-rb/v5.4.1/redis.gemspec",
+    "path": "evidence/redis/redis-rb/v5.4.1/redis.gemspec",
+    "sha256": "6c5cf962b148ee7fed0119c01ee2a93912b8c94cc79a4497b2e0c0d5d0248661"
+  },
+  {
+    "repository": "redis/redis-rb",
+    "tag": "v5.4.1",
+    "file": "lib/redis.rb",
+    "url": "https://raw.githubusercontent.com/redis/redis-rb/v5.4.1/lib/redis.rb",
+    "path": "evidence/redis/redis-rb/v5.4.1/lib/redis.rb",
+    "sha256": "2cb06d6eab8ca13281a0153ade9430cd202af3c555ee2f2ac5ce88e1e2c1b36d"
+  },
+  {
+    "repository": "redis/redis-rb",
+    "tag": "v5.4.1",
+    "file": "lib/redis/version.rb",
+    "url": "https://raw.githubusercontent.com/redis/redis-rb/v5.4.1/lib/redis/version.rb",
+    "path": "evidence/redis/redis-rb/v5.4.1/lib/redis/version.rb",
+    "sha256": "67f339dcfc80afba69790c07ddda0751c5e6c831b90fa111cc70538b85c98afb"
+  },
+  {
+    "repository": "redis/redis-rb",
+    "tag": "v5.4.1",
+    "file": "lib/redis/commands/sets.rb",
+    "url": "https://raw.githubusercontent.com/redis/redis-rb/v5.4.1/lib/redis/commands/sets.rb",
+    "path": "evidence/redis/redis-rb/v5.4.1/lib/redis/commands/sets.rb",
+    "sha256": "a9d66731b72b5fcd15179f0ab58c068c7994d53626ac2a92c5453f3ce47c354d"
+  },
+  {
+    "repository": "redis/redis-rb",
+    "tag": "v5.4.1",
+    "file": "lib/redis/commands/transactions.rb",
+    "url": "https://raw.githubusercontent.com/redis/redis-rb/v5.4.1/lib/redis/commands/transactions.rb",
+    "path": "evidence/redis/redis-rb/v5.4.1/lib/redis/commands/transactions.rb",
+    "sha256": "d77f1be23f4b57e39516af419792cdafe44cbe84e0673c981e0c48e380a4d6b9"
+  },
+  {
+    "repository": "redis/redis-rb",
+    "tag": "v5.4.1",
+    "file": "lib/redis/commands/lists.rb",
+    "url": "https://raw.githubusercontent.com/redis/redis-rb/v5.4.1/lib/redis/commands/lists.rb",
+    "path": "evidence/redis/redis-rb/v5.4.1/lib/redis/commands/lists.rb",
+    "sha256": "e74469e64545be39efa1f7335713d88ccfca9abef422f73526cbd02c0f186a6c"
   }
 ]

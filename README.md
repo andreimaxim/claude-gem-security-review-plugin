@@ -53,6 +53,12 @@ The output can contain an initial `result` with a waiting message and a later
 text and thinking alongside tool calls for evaluation. Native plugin eval can
 capture worker reports, but is not a reliable check of main-agent continuation.
 
+The Agent SDK can load the mod with its `plugins` option. Give the main agent a
+fixed dispatcher `systemPrompt`; the researcher uses its own whole prompt from
+`prompts/research.md`, not that main-agent prompt. The evaluator's SDK driver
+keeps streaming input open and checks the exact worker-ID-labelled report
+returned by the main session. See [the evaluator workflow](evals/README.md).
+
 ## Local checks
 
 ```sh

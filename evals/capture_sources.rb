@@ -8,7 +8,7 @@ require_relative "answer_key"
 
 manifest_path = File.join(__dir__, "sources.json")
 abort "Sources already frozen; review changes explicitly instead of overwriting." if File.exist?(manifest_path)
-items = ANSWER_KEY["issues"] + ANSWER_KEY["controls"]
+items = ANSWER_KEY["issues"] + ANSWER_KEY["controls"] + ANSWER_KEY["diagnostics"]
 paths = items.filter_map { |row| row["source"] }.uniq.sort
 paths += ["MIT-LICENSE", "rails.gemspec", "railties/lib/rails/application/bootstrap.rb", "activesupport/lib/active_support/cache/strategy/local_cache.rb", "activesupport/lib/active_support/cache/redis_cache_store.rb"]
 requests = [ANSWER_KEY.fetch("baseline_rails"), ANSWER_KEY.fetch("target_rails")].flat_map do |version|
@@ -18,6 +18,14 @@ requests = [ANSWER_KEY.fetch("baseline_rails"), ANSWER_KEY.fetch("target_rails")
 end
 requests += items.flat_map { |row| row.fetch("external_evidence", []) }
 requests += %w[v5.6.9 v6.6.1].map { |tag| { "repository" => "puma/puma", "tag" => tag, "file" => "LICENSE" } }
+requests += %w[jbuilder.gemspec lib/jbuilder.rb MIT-LICENSE].map do |file|
+  { "repository" => "rails/jbuilder", "tag" => "v2.13.0", "file" => file }
+end
+requests += %w[v4.8.1 v5.4.1].flat_map do |tag|
+  %w[LICENSE redis.gemspec lib/redis.rb lib/redis/version.rb lib/redis/commands/sets.rb lib/redis/commands/transactions.rb lib/redis/commands/lists.rb].map do |file|
+    { "repository" => "redis/redis-rb", "tag" => tag, "file" => file }
+  end
+end
 manifest = requests.uniq.map do |source|
   suffix = "#{source.fetch('repository')}/#{source.fetch('tag')}/#{source.fetch('file')}"
   url = "https://raw.githubusercontent.com/#{suffix}"

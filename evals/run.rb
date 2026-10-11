@@ -2,6 +2,7 @@
 # One explicitly requested paid session. No retries and no implicit model matrix.
 require "json"
 require "digest"
+require "base64"
 require "fileutils"
 require "tmpdir"
 require "open3"
@@ -17,6 +18,8 @@ abort "Refusing to overwrite #{output}" if File.exist?(output)
 manifest = JSON.parse(File.read(File.join(package, "manifest.json")))
 item = manifest.fetch("cases").find { |entry| entry["id"] == case_id }
 abort "Unknown case: #{case_id}" unless item
+abort "Freeze verification failed" unless system("ruby", File.join(__dir__, "verify.rb"), out: File::NULL)
+abort "Package belongs to another freeze" unless manifest.fetch("freeze_sha256") == Digest::SHA256.file(File.join(__dir__, "freeze.json")).hexdigest
 snapshot = File.join(package, "application.tar")
 abort "Snapshot changed" unless Digest::SHA256.file(snapshot).hexdigest == manifest.fetch("application_sha256")
 plugin = File.realpath(File.join(package, "plugin"))
@@ -29,6 +32,10 @@ manifest.fetch("plugin_files").each do |path, hash|
   abort "Plugin changed: #{path}" unless Digest::SHA256.file(File.join(plugin, path)).hexdigest == hash
 end
 runtime = File.realpath(File.expand_path(ENV.fetch("CLAUDE_RUNTIME", "~/.local/share/gem-upgrade-cli")))
+abort "SDK driver differs from the freeze; rerun setup" unless Digest::SHA256.file(File.join(runtime, "sdk-runner.mjs")).hexdigest == Digest::SHA256.file(File.join(__dir__, "sdk-runner.mjs")).hexdigest
+abort "Unexpected SDK version" unless JSON.parse(File.read(File.join(runtime, "node_modules/@anthropic-ai/claude-agent-sdk/package.json"))).fetch("version") == "0.3.296"
+version, errors, status = Open3.capture3(File.join(runtime, "node_modules/.bin/claude"), "--version")
+abort "Unexpected Claude Code version: #{errors}" unless status.success? && version.strip == "2.1.296 (Claude Code)"
 parent = output
 suffix = []
 until File.exist?(parent)
@@ -40,12 +47,7 @@ abort "Output must be outside worker mounts" if [plugin, runtime].any? { |path| 
 FileUtils.mkdir_p(output)
 File.write(File.join(output, "request.json"), JSON.pretty_generate(item) + "\n")
 FileUtils.cp(File.join(package, "manifest.json"), File.join(output, "manifest.json"))
-command = ["/opt/claude/node_modules/.bin/claude", "-p", "--input-format", "stream-json", "--output-format", "stream-json", "--verbose",
-           "--plugin-dir", "/plugin", "--setting-sources", "", "--model", "claude-opus-5-5",
-           "--permission-mode", "dontAsk", "--tools", "Read,Glob,Grep,WebSearch,WebFetch,Agent,ToolSearch",
-           "--allowedTools", "Read,Glob,Grep,WebSearch,WebFetch,mcp__gem-upgrade__research",
-           "--strict-mcp-config", "--mcp-config", '{"mcpServers":{}}', "--disable-slash-commands",
-           "--forward-subagent-text", "--include-hook-events"]
+command = ["/usr/bin/node", "/opt/claude/sdk-runner.mjs"]
 started = Process.clock_gettime(Process::CLOCK_MONOTONIC)
 state = { "started_at" => Time.now.utc.iso8601, "command" => command, "status" => "execution_failure", "isolation" => "bubblewrap; no host checkout or HOME mount" }
 begin
@@ -77,6 +79,13 @@ begin
                 trace.write(line)
                 trace.flush
                 event = JSON.parse(line)
+                if event["type"] == "eval_session_log"
+                  path = event.fetch("path")
+                  raise "Unsafe transcript path" if path.start_with?("/") || path.split("/").include?("..")
+                  destination = File.join(output, "sessions", path)
+                  FileUtils.mkdir_p(File.dirname(destination))
+                  File.binwrite(destination, Base64.strict_decode64(event.fetch("data")))
+                end
                 research.observe(event)
                 input.close if research.handoff? && !input.closed?
               end

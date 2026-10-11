@@ -41,6 +41,7 @@ test('delivers a researcher report to the main session without forwarding other 
   const prompts: string[] = []
   on('agent.list', () => ({ value: [
     { id: 'research-1', type: 'gem-upgrade:researcher', spawnedBy: 'gem-upgrade', description: 'Research faraday 2.14.2 → 2.14.4', status: 'completed' },
+    { id: 'research-2', type: 'gem-upgrade:researcher', spawnedBy: 'gem-upgrade', description: 'Research faraday 2.14.2 → 2.14.4', status: 'completed' },
     { id: 'other-agent', type: 'Explore', description: 'Explore the application', status: 'completed' },
     { id: 'other-plugin', type: 'gem-upgrade:researcher', spawnedBy: 'another-plugin', description: 'Another request', status: 'completed' },
   ] }))
@@ -50,7 +51,7 @@ test('delivers a researcher report to the main session without forwarding other 
   })
   on('turn.complete', ($, e) => ({ text: e.answer }))
 
-  for (const agentId of ['other-agent', 'other-plugin', 'research-1', undefined]) {
+  for (const agentId of ['other-agent', 'other-plugin', 'research-1', 'research-2', undefined]) {
     await $.turn.complete({
       agentId,
       turnId: `turn-${agentId}`,
@@ -62,7 +63,8 @@ test('delivers a researcher report to the main session without forwarding other 
   }
 
   expect(prompts).toEqual([
-    'Research faraday 2.14.2 → 2.14.4 completed.\n\nRelease changes and application impact: https://example.com/releases',
+    'Research faraday 2.14.2 → 2.14.4 (agent research-1) completed.\n\nRelease changes and application impact: https://example.com/releases',
+    'Research faraday 2.14.2 → 2.14.4 (agent research-2) completed.\n\nRelease changes and application impact: https://example.com/releases',
   ])
 })
 
@@ -88,6 +90,6 @@ test('reports a research failure but does not restart the main session after can
     durationMs: 1_000, answer: 'The provider is unavailable.',
   })
   expect(prompts).toEqual([
-    'Research rack 3.2.6 → 3.2.7 failed (error); no completed report.\n\nThe provider is unavailable.',
+    'Research rack 3.2.6 → 3.2.7 (agent research-1) failed (error); no completed report.\n\nThe provider is unavailable.',
   ])
 })

@@ -58,7 +58,7 @@ export const register: Register = (on) => {
       ? 'completed'
       : `failed (${e.reason}); no completed report`
     // Submission waits for the main loop to be idle; do not hold completion open.
-    void $.prompt.submit({ text: `${agent.description} ${outcome}.\n\n${e.answer}` })
+    void $.prompt.submit({ text: `${agent.description} (agent ${agent.id}) ${outcome}.\n\n${e.answer}` })
       .catch(error => $.ui.log(`Could not deliver research report: ${String(error)}`))
     return next(e)
   })

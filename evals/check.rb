@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 # Reproduce the upgrade in the existing app, then reverse only our own patches.
 require "json"
+require "digest"
 require "open3"
 require "securerandom"
 require_relative "answer_key"
@@ -9,9 +10,11 @@ require_relative "application"
 abort "Usage: ruby evals/check.rb APP_DIRECTORY [NEW_RESULTS_JSON]" unless (1..2).cover?(ARGV.size)
 app = EvaluationApplication.validate(ARGV.first)
 observations = { "baseline" => {}, "target" => {} }
+repaired_tests = []
 applied = []
-(ANSWER_KEY["issues"] + ANSWER_KEY["controls"]).each do |item|
+(ANSWER_KEY["issues"] + ANSWER_KEY["controls"] + ANSWER_KEY["diagnostics"]).each do |item|
   abort "Missing app surface: #{item['id']}" unless File.file?(File.join(app, item.fetch("location")))
+  abort "Missing app caller: #{item['id']}" if item["caller"] && !File.file?(File.join(app, item["caller"]))
 end
 
 def patch(app, path, reverse: false)
@@ -73,7 +76,7 @@ begin
   observations["target"].merge!(probe(app))
 
   failures = []
-  (ANSWER_KEY["issues"] + ANSWER_KEY["controls"]).each do |item|
+  (ANSWER_KEY["issues"] + ANSWER_KEY["controls"] + ANSWER_KEY["diagnostics"]).each do |item|
     %w[baseline target].each do |stack|
       actual = observations.fetch(stack).fetch(item.fetch("probe"))
       failures << "#{item['id']} #{stack}: expected #{item[stack].inspect}, got #{actual.inspect}" unless actual == item[stack]
@@ -91,7 +94,10 @@ begin
     out, errors, status = Open3.capture3({ "BUNDLE_GEMFILE" => File.join(app, "Gemfile"), "BUNDLE_FROZEN" => "true" },
       "bundle", "exec", "ruby", "bin/rails", "test", "--seed", seed, chdir: app)
     raise "Repaired application tests failed:\n#{out}\n#{errors}" unless status.success?
-    puts out.lines.grep(/\d+ runs, \d+ assertions/)
+    counts = out.match(/(\d+) runs, (\d+) assertions, (\d+) failures, (\d+) errors, (\d+) skips/)
+    raise "Missing Minitest result" unless counts
+    repaired_tests << %w[runs assertions failures errors skips].zip(counts.captures.map(&:to_i)).to_h.merge("seed" => seed.to_i)
+    puts counts[0]
   end
 ensure
   unwind(app, applied)
@@ -100,7 +106,9 @@ end
 EvaluationApplication.validate(app)
 if ARGV[1]
   File.write(ARGV[1], JSON.pretty_generate({ "application" => JSON.parse(File.read(File.join(__dir__, "fixture_source.json"))),
-    "observations" => observations, "repaired_tests" => "passed seeds 12345 and 67890" }) + "\n", mode: "wx")
+    "freeze_sha256" => Digest::SHA256.file(File.join(__dir__, "freeze.json")).hexdigest,
+    "rubric_version" => ANSWER_KEY["version"],
+    "observations" => observations, "repaired_tests" => repaired_tests }) + "\n", mode: "wx")
 end
 puts "PASS: #{ANSWER_KEY['issues'].size} distinct upgrade impacts and #{ANSWER_KEY['controls'].size} controls reproduced."
 puts "Target observations follow six separately reproduced prerequisite failures; reference repair tests pass."
